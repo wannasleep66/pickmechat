@@ -1,0 +1,19 @@
+[project]
+name = "chat"
+version = "0.1.0"
+description = "Core chat application"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "common",
+    "dishka>=1.7.2",
+    "fastapi[standard]>=0.128.2",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.12.0",
+    "sqlalchemy>=2.0.46",
+]
+
+[tool.uv.sources]
+common = { workspace = true }
