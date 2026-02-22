@@ -10,6 +10,12 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
   database:
@@ -39,6 +45,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      broker:
+        condition: service_healthy
 
   migrator:
     <<: *chat
@@ -47,27 +55,41 @@ services:
     command: alembic upgrade head
     restart: no
 
-  # email_connector:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/email_connector/Dockerfile
-  #   env_file: ./apps/email_connector/.env
-  #   volumes:
-  #     - ./apps/email_connector:/app
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - database
+  email_connector:
+    build:
+      context: .
+      dockerfile: ./apps/email_connector/Dockerfile
+    env_file: ./apps/email_connector/.env
+    ports:
+      - 8003:8080
+    volumes:
+      - ./apps/email_connector/app:/app/apps/email_connector/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      retries: 3
+      start_period: 15s
+    depends_on:
+      broker:
+        condition: service_healthy
 
-  # telegram_connector:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/telegram_connector/Dockerfile
-  #   env_file: ./apps/telegram_connector/.env
-  #   volumes:
-  #     - ./apps/telegram_connector:/app
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - database
+  telegram_connector:
+    build:
+      context: .
+      dockerfile: ./apps/telegram_connector/Dockerfile
+    env_file: ./apps/telegram_connector/.env
+    ports:
+      - 8002:8080
+    volumes:
+      - ./apps/telegram_connector/app:/app/apps/telegram_connector/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      retries: 3
+      start_period: 15s
+    depends_on:
+      broker:
+        condition: service_healthy
 
   centrifugo:
     image: centrifugo/centrifugo:v6

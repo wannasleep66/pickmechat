@@ -5,7 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiogram>=3.25.0",
     "common",
+    "dishka>=1.7.2",
+    "faststream[cli,rabbit,rabbitmq]>=0.6.6",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.12.0",
 ]
 
 [tool.uv.sources]

@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from schemas.user import UserSchema
+from common.schemas.user import UserSchema
 
 type MessageSource = Literal["telegram", "whatsup", "internal"]
 type MessageDirection = Literal["in", "out"]
@@ -24,4 +24,5 @@ class MessageSchema(BaseModel):
     source: MessageSource
     direction: MessageDirection
     sender: UserSchema
+    content: MessageContent
     timestamp: str

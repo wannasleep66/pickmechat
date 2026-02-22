@@ -9,12 +9,7 @@ dependencies = [
 ]
 
 [tool.uv.workspace]
-members = [
-    "apps/chat",
-    "apps/email_connector",
-    "apps/common",
-    "apps/telegram_connector",
-]
+members = ["apps/*"]
 
 [tool.ruff]
 line-length = 88
