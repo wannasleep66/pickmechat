@@ -1,4 +1,3 @@
-from aiogram.dispatcher.dispatcher import Dispatcher
 from aiogram.dispatcher.router import Router
 from aiogram.types import Message
 from dishka.integrations.aiogram import inject, FromDishka

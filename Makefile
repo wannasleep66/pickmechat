@@ -22,3 +22,16 @@ lint-email_connector:
 lint:
 	uv run ruff check --fix ./apps
 	uv run mypy ./apps
+
+
+.PHONY:logs-email_connector
+logs-email_connector:
+	docker compose logs -f email_connector
+
+.PHONY:logs-telegram_connector
+logs-telegram_connector:
+	docker compose logs -f telegram_connector
+
+.PHONY:logs-chat
+logs-chat:
+	docker compose logs -f chat

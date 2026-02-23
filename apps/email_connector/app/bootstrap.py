@@ -1,7 +1,10 @@
 import asyncio
 import logging
+from typing import cast
 
+from faststream import FastStream
 from faststream.asgi import AsgiFastStream
+from faststream.rabbit import RabbitBroker
 from loguru import logger
 from dishka.integrations.faststream import (
     FastStreamProvider,
@@ -10,7 +13,7 @@ from dishka.integrations.faststream import (
 
 from app.routes import use_routes
 from app.di import make_container
-from app.consumers import RabbitBroker, use_consumers
+from app.consumers import use_consumers
 
 
 async def setup_broker() -> None:
@@ -20,7 +23,7 @@ async def setup_broker() -> None:
     broker = await container.get(RabbitBroker)
     use_consumers(broker)
     app = AsgiFastStream(broker, asgi_routes=use_routes(container))
-    setup_broker_di(container, app)
+    setup_broker_di(container, cast(FastStream, app))
     await app.run(
         log_level=logging.INFO,
         run_extra_options={

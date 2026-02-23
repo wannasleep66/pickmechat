@@ -20,5 +20,18 @@ class BrokerSettings(BaseSettings):
     )
 
 
+class EmailSettings(BaseSettings):
+    host: str
+    port: int = 465
+    user: str
+    password: str
+    secure: bool = True
+
+    model_config = SettingsConfigDict(
+        env_prefix="EMAIL_", env_file=ENV_PATH, extra="ignore"
+    )
+
+
 class Settings(BaseSettings):
     broker: BrokerSettings = BrokerSettings()
+    email: EmailSettings = EmailSettings()

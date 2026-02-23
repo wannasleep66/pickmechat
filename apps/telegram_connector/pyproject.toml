@@ -8,7 +8,7 @@ dependencies = [
     "aiogram>=3.25.0",
     "common",
     "dishka>=1.7.2",
-    "faststream[cli,rabbit,rabbitmq]>=0.6.6",
+    "faststream[rabbit]>=0.6.6",
     "loguru>=0.7.3",
     "pydantic-settings>=2.12.0",
 ]
