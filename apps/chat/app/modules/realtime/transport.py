@@ -46,6 +46,9 @@ class RealtimeTransport:
     async def broadcast(
         self: Self, channels: list[str], message: RealtimeEvent
     ) -> None:
+        if len(channels) == 0:
+            return
+
         async with self.client as session:
             try:
                 response = await session.post(
