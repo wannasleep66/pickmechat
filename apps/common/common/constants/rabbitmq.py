@@ -15,3 +15,7 @@ class ChatRoutingKeys:
     @staticmethod
     def all_incoming() -> str:
         return "incoming.message.*"
+
+    @staticmethod
+    def delivery_status() -> str:
+        return "delivery-status"

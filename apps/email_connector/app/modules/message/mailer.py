@@ -19,8 +19,8 @@ class Mailer:
 
         await aiosmtplib.send(
             mail,
-            hostname=self.settings.host,
-            port=self.settings.port,
+            hostname=self.settings.smtp_host,
+            port=self.settings.smtp_port,
             username=self.settings.user,
             password=self.settings.password,
             use_tls=self.settings.secure,

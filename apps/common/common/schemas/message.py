@@ -4,9 +4,11 @@ from pydantic import BaseModel
 
 from common.schemas.user import UserSchema
 
-type MessageSource = Literal["telegram", "whatsup", "internal"]
+type MessageSource = Literal["telegram", "email", "internal"]
 type MessageDirection = Literal["in", "out"]
 type MessageAttachmentType = Literal["file", "image"]
+
+type DeliveryStatus = Literal["delivered", "failed", "pending"]
 
 
 class MessageAttachment(BaseModel):
@@ -19,10 +21,22 @@ class MessageContent(BaseModel):
     attachments: list[MessageAttachmentType]
 
 
-class MessageSchema(BaseModel):
-    id: str
+class OutgoingMessageSchema(BaseModel):
+    internal_id: int
     source: MessageSource
-    direction: MessageDirection
+    sender: UserSchema
+    to: UserSchema
+    content: MessageContent
+    timestamp: str
+
+
+class IncomingMessageSchema(BaseModel):
+    source: MessageSource
     sender: UserSchema
     content: MessageContent
     timestamp: str
+
+
+class DeliveryStatusSchema(BaseModel):
+    internal_message_id: int
+    status: DeliveryStatus

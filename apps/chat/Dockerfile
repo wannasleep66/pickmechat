@@ -25,6 +25,8 @@ RUN groupadd -r app && useradd -r -g app app
 
 WORKDIR /app
 
+RUN mkdir -p /app/logs && chown -R app:app /app
+
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --from=builder --chown=app:app /app/apps/chat /app/apps/chat
 COPY --from=builder --chown=app:app /app/apps/common /app/apps/common/
@@ -34,4 +36,4 @@ ENV PYTHONPATH="/app/apps/chat"
 
 USER app
 
-CMD ["uvicorn", "apps.chat.app.bootstrap:create_app", "--factory", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["python", "-m", "apps.chat.app"]

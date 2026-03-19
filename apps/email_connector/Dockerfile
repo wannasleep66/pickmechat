@@ -25,6 +25,8 @@ RUN groupadd -r app && useradd -r -g app app
 
 WORKDIR /app
 
+RUN mkdir -p /app/logs && chown -R app:app /app
+
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --from=builder --chown=app:app /app/apps/email_connector /app/apps/email_connector
 COPY --from=builder --chown=app:app /app/apps/common /app/apps/common/

@@ -39,6 +39,14 @@ class ModelAlreadyExistsException(ApplicationException):
         return "Модель уже существует"
 
 
+class PermissionException(ApplicationException):
+    """Исключение не достаточно прав"""
+
+    @property
+    def msg(self: Self) -> str:
+        return "Недостаточно прав"
+
+
 class ValidationException(ApplicationException):
     """Исключение валидации"""
 
@@ -85,6 +93,18 @@ async def model_already_exists_exception_handler(
     )
 
 
+async def permission_exception_handler(
+    request: Request, exc: PermissionException
+) -> Response:
+    return await http_exception_handler(
+        request,
+        HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=[exc.get_schema().model_dump()],
+        ),
+    )
+
+
 async def validation_exception_handler(
     request: Request, exc: ValidationException
 ) -> Response:
@@ -103,3 +123,4 @@ def use_exception_handlers(app: FastAPI) -> None:
         model_already_exists_exception_handler
     )
     app.exception_handler(ValidationException)(validation_exception_handler)
+    app.exception_handler(PermissionException)(permission_exception_handler)

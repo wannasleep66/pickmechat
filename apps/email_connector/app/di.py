@@ -1,9 +1,16 @@
 from typing import Self
-from dishka import AsyncContainer, Provider, Scope, make_async_container, provide
+
+from dishka import (
+    AsyncContainer,
+    Provider,
+    Scope,
+    make_async_container,
+    provide,
+)
 from faststream.rabbit import RabbitBroker
 
-from app.settings import BrokerSettings, EmailSettings, Settings
 from app.modules.message.di import ModuleProvider as MessageModuleProvider
+from app.settings import BrokerSettings, EmailSettings, Settings
 
 
 class SettingsProvider(Provider):

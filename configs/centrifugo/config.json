@@ -1,15 +1,22 @@
 {
   "client": {
     "token": {
-      "hmac_secret_key": "bbe7d157-a253-4094-9759-06a8236543f9"
+      "hmac_secret_key": "l1,m1:1ersecretkey123asdfmj;klj;1104hlkjasldkfjzhxcv,"
     },
-    "allowed_origins": []
+    "allowed_origins": ["*", "http://localhost:5173"]
   },
   "http_api": {
     "key": "d7627bb6-2292-4911-82e1-615c0ed3eebb"
   },
+  "channel": {
+    "namespaces": {
+      "name": "personal",
+      "presence": true,
+      "allow_subscribe_for_client": true
+    }
+  },
   "admin": {
-    "enabled": false,
+    "enabled": true,
     "password": "d0683813-0916-4c49-979f-0e08a686b727",
     "secret": "4e9eafcf-0120-4ddd-b668-8dc40072c78e"
   }

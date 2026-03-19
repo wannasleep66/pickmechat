@@ -1,11 +1,10 @@
 from aiogram.dispatcher.router import Router
 from aiogram.types import Message
-from dishka.integrations.aiogram import inject, FromDishka
+from common.schemas.message import IncomingMessageSchema, MessageContent
+from common.schemas.user import UserSchema
+from dishka.integrations.aiogram import FromDishka, inject
 
 from app.modules.message.service import MessageService
-from common.schemas.message import MessageContent, MessageSchema
-from common.schemas.user import UserSchema
-
 
 handler = Router()
 
@@ -20,10 +19,8 @@ async def handle_incoming(
         return
 
     await message_service.send_to_operator(
-        MessageSchema(
-            id=str(message.message_id),
+        IncomingMessageSchema(
             source="telegram",
-            direction="in",
             content=MessageContent(
                 text=message.text if message.text else "", attachments=[]
             ),

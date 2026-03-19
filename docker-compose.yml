@@ -27,7 +27,7 @@ services:
       - 5432:5432
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U pickmeuser pickmedb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,10 +41,13 @@ services:
       - 8000:8080
     volumes:
       - ./apps/chat/app:/app/apps/chat/app
+      - ./apps/chat/migrations:/app/apps/chat/migrations
     restart: unless-stopped
     depends_on:
-      database:
-        condition: service_healthy
+      # database:
+      #   condition: service_healthy
+      centrifugo:
+        condition: service_started
       broker:
         condition: service_healthy
 
@@ -65,10 +68,10 @@ services:
     volumes:
       - ./apps/email_connector/app:/app/apps/email_connector/app
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      retries: 3
-      start_period: 15s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080"]
+    #   retries: 3
+    #   start_period: 15s
     depends_on:
       broker:
         condition: service_healthy
@@ -83,10 +86,10 @@ services:
     volumes:
       - ./apps/telegram_connector/app:/app/apps/telegram_connector/app
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      retries: 3
-      start_period: 15s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+    #   retries: 3
+    #   start_period: 15s
     depends_on:
       broker:
         condition: service_healthy
@@ -95,6 +98,7 @@ services:
     image: centrifugo/centrifugo:v6
     volumes:
       - ./configs/centrifugo/config.json:/centrifugo/config.json
+    restart: unless-stopped
     command: centrifugo -c /centrifugo/config.json
     ports:
       - 8001:8000

@@ -1,21 +1,27 @@
 import asyncio
 import logging
 from typing import cast
+
+from aiogram import Bot, Dispatcher
+from common.setups.logging import setup_logging
+from dishka.integrations.aiogram import AiogramProvider
+from dishka.integrations.aiogram import setup_dishka as setup_bot_di
 from dishka.integrations.faststream import (
     FastStreamProvider,
+)
+from dishka.integrations.faststream import (
     setup_dishka as setup_broker_di,
 )
 from faststream import FastStream
 from faststream.asgi import AsgiFastStream
 from faststream.rabbit import RabbitBroker
-from aiogram import Bot, Dispatcher
-from dishka.integrations.aiogram import AiogramProvider, setup_dishka as setup_bot_di
 from loguru import logger
 
-from app.di import make_container
 from app.consumers import use_consumers
+from app.di import make_container
 from app.handlers import use_handlers
 from app.routes import use_routes
+from app.settings import AppSettings
 
 
 async def setup_broker() -> None:
@@ -56,6 +62,10 @@ async def setup_bot() -> None:
 
 
 async def bootstrap() -> None:
+    settings = AppSettings()
+
+    setup_logging(env=settings.env)
+
     apps = [setup_broker(), setup_bot()]
 
     try:

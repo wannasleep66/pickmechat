@@ -1,4 +1,5 @@
 import asyncio
+from importlib import import_module
 from logging.config import fileConfig
 
 from alembic import context
@@ -12,6 +13,11 @@ config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+import_module("app.modules.operator.model")
+import_module("app.modules.conversation.model")
+import_module("app.modules.message.model")
+import_module("app.modules.assigment.model")
 
 target_metadata = Base.metadata
 

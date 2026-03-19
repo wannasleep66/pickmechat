@@ -1,8 +1,17 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_PATH = Path(__file__).parent.parent / ".env"
+
+
+class AppSettings(BaseSettings):
+    env: Literal["prod", "dev"] = "dev"
+
+    model_config = SettingsConfigDict(
+        env_prefix="APP_", env_file=ENV_PATH, extra="ignore"
+    )
 
 
 class BrokerSettings(BaseSettings):
@@ -21,8 +30,10 @@ class BrokerSettings(BaseSettings):
 
 
 class EmailSettings(BaseSettings):
-    host: str
-    port: int = 465
+    smtp_host: str
+    smtp_port: int = 465
+    imap_host: str
+    imap_port: int
     user: str
     password: str
     secure: bool = True
