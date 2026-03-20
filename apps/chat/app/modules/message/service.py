@@ -28,6 +28,7 @@ from app.modules.realtime.events import (
     DeliveryStatusUpdatePayload,
     NewMessageEvent,
     NewMessageEventPayload,
+    NewMessageSchema,
 )
 from app.modules.realtime.transport import RealtimeTransport
 
@@ -81,7 +82,7 @@ class MessageService:
             message=NewMessageEvent(
                 payload=NewMessageEventPayload(
                     conversation_id=conversation.id,
-                    new_message=MessageOutSchema(
+                    new_message=NewMessageSchema(
                         id=message.id,
                         text=message.text,
                         attachments=[],
@@ -153,7 +154,7 @@ class MessageService:
                 payload=NewMessageEventPayload(
                     conversation_id=conversation.id,
                     client_id=message_in.client_id,
-                    new_message=MessageOutSchema(
+                    new_message=NewMessageSchema(
                         id=message.id,
                         text=message.text,
                         attachments=[],

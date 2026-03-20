@@ -3,7 +3,7 @@ from typing import Self
 import httpx
 from loguru import logger
 
-from app.modules.realtime.events import RealtimeEvent
+from app.modules.realtime.events import Payload, RealtimeEvent
 from app.settings import RealtimeTransportSettings
 
 
@@ -18,7 +18,9 @@ class RealtimeTransport:
             },
         )
 
-    async def publish(self: Self, channel: str, message: RealtimeEvent) -> None:
+    async def publish(
+        self: Self, channel: str, message: RealtimeEvent[Payload]
+    ) -> None:
         async with self.client as session:
             try:
                 response = await session.post(
@@ -44,7 +46,7 @@ class RealtimeTransport:
         )
 
     async def broadcast(
-        self: Self, channels: list[str], message: RealtimeEvent
+        self: Self, channels: list[str], message: RealtimeEvent[Payload]
     ) -> None:
         if len(channels) == 0:
             return

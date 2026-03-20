@@ -1,3 +1,4 @@
+from typing import TypeVar
 from common.schemas.message import DeliveryStatus
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
@@ -12,18 +13,27 @@ class RealtimeEventPayload(BaseModel):
     )
 
 
+Payload = TypeVar("Payload", bound=RealtimeEventPayload)
+
+
 class RealtimeEvent[RealtimeEventPayload](BaseModel):
     type: str
     payload: RealtimeEventPayload
 
 
+class NewMessageSchema(MessageOutSchema):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(serialization_alias=to_camel)
+    )
+
+
 class NewMessageEventPayload(RealtimeEventPayload):
     conversation_id: int
     client_id: str | None = None
-    new_message: MessageOutSchema
+    new_message: NewMessageSchema
 
 
-class NewMessageEvent(RealtimeEvent):
+class NewMessageEvent(RealtimeEvent[NewMessageEventPayload]):
     type: str = "new_message"
     payload: NewMessageEventPayload
 
@@ -33,7 +43,7 @@ class DeliveryStatusUpdatePayload(RealtimeEventPayload):
     delivery_status: DeliveryStatus
 
 
-class DeliveryStatusUpdateEvent(RealtimeEvent):
+class DeliveryStatusUpdateEvent(RealtimeEvent[DeliveryStatusUpdatePayload]):
     type: str = "delivery_status_update"
     payload: DeliveryStatusUpdatePayload
 
@@ -48,11 +58,11 @@ class ConversationUnassignedPayload(RealtimeEventPayload):
     operator_id: int
 
 
-class ConversationAssigned(RealtimeEvent):
+class ConversationAssigned(RealtimeEvent[ConversationAssignedPayload]):
     type: str = "conversation_assigned"
     payload: ConversationAssignedPayload
 
 
-class ConversationUnassigned(RealtimeEvent):
+class ConversationUnassigned(RealtimeEvent[ConversationUnassignedPayload]):
     type: str = "conversation_unassigned"
     payload: ConversationUnassignedPayload
