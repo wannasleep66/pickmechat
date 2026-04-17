@@ -15,7 +15,7 @@ type SenderType = Literal["operator", "user", "system"]
 
 class MessageSender(BaseModel):
     id: str
-    senderType: SenderType
+    sender_type: SenderType
     name: str
     avatar_url: str | None = None
 
@@ -79,14 +79,14 @@ class MessageOutSchema(BaseModel):
         if obj.operator:
             sender = MessageSender(
                 id=str(obj.operator.id),
-                senderType=cast(SenderType, obj.sender_type),
+                sender_type=cast(SenderType, obj.sender_type),
                 name=obj.operator.name,
                 avatar_url=obj.operator.avatar_url,
             )
         else:
             sender = MessageSender(
                 id=obj.external_user_id or "system",
-                senderType=cast(SenderType, obj.sender_type),
+                sender_type=cast(SenderType, obj.sender_type),
                 name=obj.external_user_name or "System",
                 avatar_url=None,
             )
@@ -124,13 +124,18 @@ class MessageRequestSchema(RequestSchema):
 class IncomingMessageRequestSchema(RequestSchema, IncomingMessageSchema): ...
 
 
+class MessageSenderResponseSchema(MessageSender, ResponseSchema): ...
+
+
 class MessageResponseSchema(ResponseSchema):
     id: int = Field(..., description="Уникальный идентификатор сообщения")
     text: str = Field(..., description="Текст сообщения")
     attachments: list[str] = Field(
         default_factory=list[str], description="Медиа-файлы прикрепленные к сообщению"
     )
-    sender: MessageSender = Field(..., description="Отправитель сообщения")
+    sender: MessageSenderResponseSchema = Field(
+        ..., description="Отправитель сообщения"
+    )
     source: MessageSource = Field(..., description="Источник отправителя")
     delivery_status: DeliveryStatus = Field(
         ..., description="Статус доставки сообщения"

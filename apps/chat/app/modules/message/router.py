@@ -10,6 +10,7 @@ from app.modules.message.schemas import (
     MessageResponseSchema,
 )
 from app.modules.message.service import MessageService
+from app.schemas.pagination import PaginatedResponseSchema
 
 router = APIRouter()
 
@@ -20,18 +21,21 @@ async def get_conversation_messages(
     _: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     message_service: FromDishka[MessageService],
-    before_id: int | None = Query(
-        None,
-        description="Идентификатор сообщения, перед которым нужно получить сообщения",
+    cursor: int | None = Query(
+        None, description="Идентификатор сообщения, после которого нужны сообщения"
     ),
     limit: int = Query(25, description="Количество сообщений для получения"),
-) -> list[MessageResponseSchema]:
+) -> PaginatedResponseSchema[list[MessageResponseSchema]]:
     """Получение сообщений диалога"""
 
-    messages = await message_service.get_by_conversation(
-        conversation_id=conversation_id, before_id=before_id, limit=limit
+    paginated = await message_service.get_by_conversation(
+        conversation_id=conversation_id, cursor=cursor, limit=limit
     )
-    return [MessageResponseSchema(**message.model_dump()) for message in messages]
+
+    return PaginatedResponseSchema(
+        data=[MessageResponseSchema(**msg.model_dump()) for msg in paginated.data],
+        pagination=paginated.pagination,
+    )
 
 
 @router.post(

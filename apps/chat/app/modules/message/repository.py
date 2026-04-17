@@ -1,5 +1,5 @@
-from sqlalchemy import desc, select
-from app.repositories.database import DatabaseRepository
+from sqlalchemy import asc, select
+
 from app.modules.message.model import Message
 from app.modules.message.schemas import (
     MessageCreateSchema,
@@ -7,6 +7,8 @@ from app.modules.message.schemas import (
     MessageReadSchema,
     MessageUpdateSchema,
 )
+from app.repositories.database import DatabaseRepository
+from app.schemas.pagination import CursorPaginationMeta, Paginated
 
 
 class MessageRepository(
@@ -21,17 +23,29 @@ class MessageRepository(
     model_schema = MessageReadSchema
 
     async def get_by_conversation(
-        self, conversation_id: int, before_id: int | None = None, limit: int = 25
-    ) -> list[MessageOutSchema]:
+        self,
+        conversation_id: int,
+        cursor: int | None = None,
+        limit: int = 25,
+    ) -> Paginated[list[MessageOutSchema]]:
         stmt = (
             select(Message)
             .filter_by(conversation_id=conversation_id)
-            .order_by(desc(Message.timestamp))
-            .limit(limit)
+            .order_by(asc(Message.id))
+            .limit(limit + 1)
         )
 
-        if before_id:
-            stmt = stmt.filter(Message.id < before_id)
+        if cursor:
+            stmt = stmt.filter(Message.id > cursor)
 
-        instances = await self.session.scalars(stmt)
-        return [MessageOutSchema.model_validate(inst) for inst in instances]
+        instances = list(await self.session.scalars(stmt))
+        has_more = len(instances) > limit
+        return Paginated(
+            data=[
+                MessageOutSchema.model_validate(item)
+                for item in instances[:limit][::-1]
+            ],
+            pagination=CursorPaginationMeta(
+                next_cursor=instances[1].id if has_more else None
+            ),
+        )

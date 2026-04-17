@@ -44,8 +44,8 @@ services:
       - ./apps/chat/migrations:/app/apps/chat/migrations
     restart: unless-stopped
     depends_on:
-      # database:
-      #   condition: service_healthy
+      database:
+        condition: service_started
       centrifugo:
         condition: service_started
       broker:

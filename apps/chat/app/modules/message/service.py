@@ -31,6 +31,7 @@ from app.modules.realtime.events import (
     NewMessageSchema,
 )
 from app.modules.realtime.transport import RealtimeTransport
+from app.schemas.pagination import Paginated
 
 
 class MessageService:
@@ -92,7 +93,7 @@ class MessageService:
                         sender=MessageSender(
                             id=cast(str, message.external_user_id),
                             name=cast(str, message.external_user_name),
-                            senderType=message.sender_type,
+                            sender_type=message.sender_type,
                             avatar_url=conversation.avatar_url,
                         ),
                     ),
@@ -163,7 +164,7 @@ class MessageService:
                         delivery_status=message.delivery_status,
                         sender=MessageSender(
                             id=str(message.operator_id),
-                            senderType=message.sender_type,
+                            sender_type=message.sender_type,
                             name=operator.name,
                             avatar_url=operator.avatar_url,
                         ),
@@ -202,8 +203,8 @@ class MessageService:
         )
 
     async def get_by_conversation(
-        self: Self, conversation_id: int, before_id: int | None, limit: int = 25
-    ) -> list[MessageOutSchema]:
+        self: Self, conversation_id: int, cursor: int | None, limit: int = 25
+    ) -> Paginated[list[MessageOutSchema]]:
         return await self.message_repository.get_by_conversation(
-            conversation_id, before_id=before_id, limit=limit
+            conversation_id, cursor=cursor, limit=limit
         )
