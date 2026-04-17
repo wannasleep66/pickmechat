@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Self
 
-from loguru import logger
-
 from app.exceptions import ModelNotFoundException
 from app.modules.conversation.repository import (
     ConversationRepository,
@@ -11,6 +9,7 @@ from app.modules.conversation.schemas import (
     ConversationCreateSchema,
     ConversationDetailsOutSchema,
     ConversationOutSchema,
+    ConversationQueryFilter,
     ConversationReadSchema,
     ConversationUpdateSchema,
 )
@@ -37,7 +36,6 @@ class ConversationService:
         closed_conversation = await self.conversation_repository.update(
             conversation_to_close.id, ConversationUpdateSchema(closed_at=datetime.now())
         )
-        logger.info("Closed conversation {conversation_id}", closed_conversation.id)
         return closed_conversation
 
     async def get(self: Self, conversation_id: int) -> ConversationReadSchema:
@@ -58,5 +56,11 @@ class ConversationService:
 
         return conversation_details
 
-    async def get_all(self: Self) -> list[ConversationOutSchema]:
-        return await self.conversation_repository.get_all_with_last_message()
+    async def get_all(
+        self: Self,
+        operator_id: int,
+        filter: ConversationQueryFilter = "all",
+    ) -> list[ConversationOutSchema]:
+        return await self.conversation_repository.get_all_with_last_message(
+            operator_id, filter
+        )

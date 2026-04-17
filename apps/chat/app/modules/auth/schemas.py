@@ -36,7 +36,7 @@ class RegisterRequestSchema(RequestSchema):
     username: str
     password: str
     name: str
-    image_url: str | None = None
+    avatar_url: str | None = None
 
 
 class SessionResponseSchema(BaseModel):

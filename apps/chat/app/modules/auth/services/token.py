@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Any, Self
 
 import jwt
-from loguru import logger
 
 from app.modules.auth.exceptions import InvalidTokenException
 from app.modules.auth.schemas import TokenPayload
@@ -49,7 +48,6 @@ class TokenService:
         try:
             payload = self.decode(token)
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as exc:
-            logger.exception(exc)
             raise InvalidTokenException()
         return TokenPayload(**payload)
 

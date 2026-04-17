@@ -64,6 +64,7 @@ async def get_subscription_token(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 @inject
 async def logout(
+    _: OperatorDep,
     response: Response,
 ) -> None:
     """Выход пользователя"""
