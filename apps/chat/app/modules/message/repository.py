@@ -40,12 +40,10 @@ class MessageRepository(
 
         instances = list(await self.session.scalars(stmt))
         has_more = len(instances) > limit
+        data = instances[:limit]
         return Paginated(
-            data=[
-                MessageOutSchema.model_validate(item)
-                for item in instances[:limit][::-1]
-            ],
+            data=[MessageOutSchema.model_validate(item) for item in data],
             pagination=CursorPaginationMeta(
-                next_cursor=instances[1].id if has_more else None
+                next_cursor=data[-1].id if has_more else None
             ),
         )
