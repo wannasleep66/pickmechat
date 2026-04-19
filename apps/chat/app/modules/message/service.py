@@ -55,7 +55,7 @@ class MessageService:
     ) -> None:
         conversation = await self.conversation_service.get_or_create(
             ConversationCreateSchema(
-                title=f"{incoming_message.sender.external_id} {incoming_message.sender.name}",
+                title=incoming_message.sender.name,
                 channel=incoming_message.source,
                 external_user_id=incoming_message.sender.external_id,
             )
