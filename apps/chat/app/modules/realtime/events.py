@@ -1,10 +1,11 @@
 from typing import TypeVar
+
 from common.schemas.message import DeliveryStatus
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 
-from app.modules.message.schemas import MessageOutSchema
+from app.modules.message.schemas import MessageOutSchema, MessageSender
 
 
 class RealtimeEventPayload(BaseModel):
@@ -21,7 +22,15 @@ class RealtimeEvent[RealtimeEventPayload](BaseModel):
     payload: RealtimeEventPayload
 
 
+class NewMessageSenderSchema(MessageSender):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(serialization_alias=to_camel)
+    )
+
+
 class NewMessageSchema(MessageOutSchema):
+    sender: NewMessageSenderSchema  # pyright: ignore[reportIncompatibleVariableOverride]
+
     model_config = ConfigDict(
         alias_generator=AliasGenerator(serialization_alias=to_camel)
     )

@@ -1,4 +1,4 @@
-from sqlalchemy import asc, select
+from sqlalchemy import desc, select
 
 from app.modules.message.model import Message
 from app.modules.message.schemas import (
@@ -31,19 +31,19 @@ class MessageRepository(
         stmt = (
             select(Message)
             .filter_by(conversation_id=conversation_id)
-            .order_by(asc(Message.id))
+            .order_by(desc(Message.id))
             .limit(limit + 1)
         )
 
         if cursor:
-            stmt = stmt.filter(Message.id > cursor)
+            stmt = stmt.filter(Message.id < cursor)
 
         instances = list(await self.session.scalars(stmt))
         has_more = len(instances) > limit
-        data = instances[:limit]
+        data = instances[:limit][::-1]
         return Paginated(
             data=[MessageOutSchema.model_validate(item) for item in data],
             pagination=CursorPaginationMeta(
-                next_cursor=data[-1].id if has_more else None
+                next_cursor=data[0].id if has_more else None
             ),
         )

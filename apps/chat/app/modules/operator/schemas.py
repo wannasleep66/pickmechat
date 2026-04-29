@@ -1,5 +1,6 @@
 from pydantic import Field
-from app.schemas.crud import ReadSchema, CreateSchema, UpdateSchema
+
+from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
 from apps.chat.app.modules.message.schemas import ResponseSchema
 
 

@@ -19,7 +19,6 @@ from app.modules.message.repository import MessageCreateSchema, MessageRepositor
 from app.modules.message.schemas import (
     MessageInSchema,
     MessageOutSchema,
-    MessageSender,
     MessageUpdateSchema,
 )
 from app.modules.operator.schemas import OperatorReadSchema
@@ -29,6 +28,7 @@ from app.modules.realtime.events import (
     NewMessageEvent,
     NewMessageEventPayload,
     NewMessageSchema,
+    NewMessageSenderSchema,
 )
 from app.modules.realtime.transport import RealtimeTransport
 from app.schemas.pagination import Paginated
@@ -90,7 +90,7 @@ class MessageService:
                         source=message.source,
                         timestamp=message.timestamp,
                         delivery_status=message.delivery_status,
-                        sender=MessageSender(
+                        sender=NewMessageSenderSchema(
                             id=cast(str, message.external_user_id),
                             name=cast(str, message.external_user_name),
                             sender_type=message.sender_type,
@@ -162,7 +162,7 @@ class MessageService:
                         source=message.source,
                         timestamp=message.timestamp,
                         delivery_status=message.delivery_status,
-                        sender=MessageSender(
+                        sender=NewMessageSenderSchema(
                             id=str(message.operator_id),
                             sender_type=message.sender_type,
                             name=operator.name,

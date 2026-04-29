@@ -9,11 +9,20 @@
     "key": "d7627bb6-2292-4911-82e1-615c0ed3eebb"
   },
   "channel": {
-    "namespaces": {
-      "name": "personal",
-      "presence": true,
-      "allow_subscribe_for_client": true
-    }
+    "namespaces": [
+      {
+        "name": "personal",
+        "allow_subscribe_for_client": true
+      },
+      {
+        "name": "public",
+        "presence": true,
+        "join_leave": true,
+        "force_push_join_leave": true,
+        "allow_subscribe_for_client": true,
+        "allow_presence_for_subscriber": true
+      }
+    ]
   },
   "admin": {
     "enabled": true,
