@@ -1,6 +1,6 @@
 from typing import Self
 
-from sqlalchemy import desc, func, select
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import coalesce, count
 
@@ -113,8 +113,10 @@ class ConversationRepository(
             .outerjoin(
                 LastRead,
                 (
-                    LastRead.conversation_id == Conversation.id
-                    and LastRead.operator_id == operator_id
+                    and_(
+                        LastRead.conversation_id == Conversation.id,
+                        LastRead.operator_id == operator_id,
+                    )
                 ),
             )
             .outerjoin(
