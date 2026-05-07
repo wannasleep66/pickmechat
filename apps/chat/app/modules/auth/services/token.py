@@ -47,7 +47,7 @@ class TokenService:
     def verify(self: Self, token: str) -> TokenPayload:
         try:
             payload = self.decode(token)
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as exc:
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise InvalidTokenException()
         return TokenPayload(**payload)
 

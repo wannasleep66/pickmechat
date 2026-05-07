@@ -4,12 +4,16 @@ from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path, Query, status
 
 from app.modules.auth.security import OperatorDep
-from app.modules.conversation.schemas import (
+from app.modules.conversation.schemas.conversation import (
     ConversationDetailsResponseSchema,
     ConversationQueryFilter,
     ConversationResponseSchema,
 )
 from app.modules.conversation.service import ConversationService
+from apps.chat.app.modules.conversation.schemas.last_read import (
+    LastReadInSchema,
+    LastReadRequestSchema,
+)
 
 router = APIRouter(prefix="/conversations")
 
@@ -23,21 +27,41 @@ async def get_all_conversations(
 ) -> list[ConversationResponseSchema]:
     """Получить все диалоги"""
 
-    conversations = await conversation_service.get_all(operator.id, filter)
+    conversations = await conversation_service.get_all(operator, filter)
     return [ConversationResponseSchema(**c.model_dump()) for c in conversations]
 
 
 @router.get("/{conversation_id}")
 @inject
 async def get_conversation_details(
-    _: OperatorDep,
+    operator: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     conversation_service: FromDishka[ConversationService],
 ) -> ConversationDetailsResponseSchema:
     """Получение подробной информации по диалогу"""
 
-    conversation_details = await conversation_service.get_details(conversation_id)
+    conversation_details = await conversation_service.get_details(
+        operator, conversation_id
+    )
     return ConversationDetailsResponseSchema(**conversation_details.model_dump())
+
+
+@router.post("/{conversation_id}/last_read", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def set_conversation_last_read(
+    operator: OperatorDep,
+    conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
+    last_read_in: LastReadRequestSchema,
+    conversation_service: FromDishka[ConversationService],
+) -> None:
+    """Установка последнего прочитанного сообщения в диалоге"""
+
+    await conversation_service.set_last_read(
+        operator,
+        last_read_in=LastReadInSchema(
+            **last_read_in.model_dump(), conversation_id=conversation_id
+        ),
+    )
 
 
 @router.delete("/{conversation_id}/close", status_code=status.HTTP_204_NO_CONTENT)

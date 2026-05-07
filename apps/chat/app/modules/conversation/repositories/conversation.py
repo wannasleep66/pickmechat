@@ -2,10 +2,12 @@ from typing import Self
 
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql.functions import coalesce, count
 
 from app.modules.assigment.model import Assigment
-from app.modules.conversation.model import Conversation
-from app.modules.conversation.schemas import (
+from app.modules.conversation.models.conversation import Conversation
+from app.modules.conversation.models.last_read import LastRead
+from app.modules.conversation.schemas.conversation import (
     ConversationCreateSchema,
     ConversationDetailsOutSchema,
     ConversationOutSchema,
@@ -29,7 +31,7 @@ class ConversationRepository(
     model_schema = ConversationReadSchema
 
     async def get_details(
-        self: Self, conversation_id: int
+        self: Self, operator_id: int, conversation_id: int
     ) -> ConversationDetailsOutSchema | None:
         stmt = (
             select(Conversation)
@@ -52,15 +54,44 @@ class ConversationRepository(
             .limit(1)
         )
         last_message = await self.session.scalar(last_message_stmt)
-        return ConversationDetailsOutSchema.model_validate((conversation, last_message))
 
-    async def get_all_with_last_message(
+        last_read_stmt = select(LastRead).filter_by(
+            conversation_id=conversation.id, operator_id=operator_id
+        )
+        last_read = await self.session.scalar(last_read_stmt)
+
+        unread_count_stmt = select(count(Message.id)).filter(
+            Message.conversation_id == conversation.id,
+            Message.id > coalesce(last_read.message_id if last_read else None, 0),
+        )
+        unread_count = await self.session.scalar(unread_count_stmt)
+
+        return ConversationDetailsOutSchema.model_validate(
+            {
+                "conversation": conversation,
+                "last_message": last_message,
+                "last_read": last_read,
+                "unread_count": unread_count if unread_count else 0,
+            }
+        )
+
+    async def get_all_detailed(
         self: Self, operator_id: int, filter: ConversationQueryFilter = "all"
     ) -> list[ConversationOutSchema]:
         last_message_subquery = (
             select(Message.conversation_id, func.max(Message.id).label("max_id"))
             .group_by(Message.conversation_id)
             .subquery()
+        )
+
+        unread_count_subquery = (
+            select(count(Message.id))
+            .filter(
+                Message.conversation_id == Conversation.id,
+                Message.id > coalesce(LastRead.message_id, 0),
+            )
+            .correlate(Conversation, LastRead)
+            .scalar_subquery()
         )
 
         apply_filter = {
@@ -73,7 +104,19 @@ class ConversationRepository(
         }[filter]
 
         stmt = (
-            select(Conversation, Message)
+            select(
+                Conversation,
+                Message,
+                LastRead,
+                unread_count_subquery.label("UnreadCount"),
+            )
+            .outerjoin(
+                LastRead,
+                (
+                    LastRead.conversation_id == Conversation.id
+                    and LastRead.operator_id == operator_id
+                ),
+            )
             .outerjoin(
                 last_message_subquery,
                 Conversation.id == last_message_subquery.c.conversation_id,
@@ -88,4 +131,15 @@ class ConversationRepository(
         stmt = apply_filter(stmt)
 
         records = await self.session.execute(stmt)
-        return [ConversationOutSchema.model_validate(r.tuple()) for r in records.all()]
+
+        return [
+            ConversationOutSchema.model_validate(
+                {
+                    "conversation": mapping.Conversation,
+                    "last_message": mapping.Message,
+                    "last_read": mapping.LastRead,
+                    "unread_count": mapping.UnreadCount,
+                }
+            )
+            for mapping in records.mappings().all()
+        ]

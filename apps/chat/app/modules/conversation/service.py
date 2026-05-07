@@ -1,11 +1,14 @@
 from datetime import datetime
 from typing import Self
 
+from loguru import logger
+
 from app.exceptions import ModelNotFoundException
-from app.modules.conversation.repository import (
+from app.modules.conversation.repositories.conversation import (
     ConversationRepository,
 )
-from app.modules.conversation.schemas import (
+from app.modules.conversation.repositories.last_read import LastReadRepository
+from app.modules.conversation.schemas.conversation import (
     ConversationCreateSchema,
     ConversationDetailsOutSchema,
     ConversationOutSchema,
@@ -13,11 +16,22 @@ from app.modules.conversation.schemas import (
     ConversationReadSchema,
     ConversationUpdateSchema,
 )
+from app.modules.conversation.schemas.last_read import (
+    LastReadCreateSchema,
+    LastReadInSchema,
+    LastReadUpdateSchema,
+)
+from app.modules.operator.schemas import OperatorReadSchema
 
 
 class ConversationService:
-    def __init__(self: Self, conversation_repository: ConversationRepository) -> None:
+    def __init__(
+        self: Self,
+        conversation_repository: ConversationRepository,
+        last_read_repository: LastReadRepository,
+    ) -> None:
         self.conversation_repository = conversation_repository
+        self.last_read_repository = last_read_repository
 
     async def get_or_create(
         self: Self, conversation_create: ConversationCreateSchema
@@ -38,6 +52,35 @@ class ConversationService:
         )
         return closed_conversation
 
+    async def set_last_read(
+        self: Self, operator: OperatorReadSchema, last_read_in: LastReadInSchema
+    ) -> None:
+
+        last_read = await self.last_read_repository.get_by(
+            operator_id=operator.id, conversation_id=last_read_in.conversation_id
+        )
+
+        if not last_read:
+            await self.last_read_repository.create(
+                LastReadCreateSchema(
+                    operator_id=operator.id,
+                    conversation_id=last_read_in.conversation_id,
+                    message_id=last_read_in.message_id,
+                )
+            )
+            return
+
+        await self.last_read_repository.update(
+            last_read.id, LastReadUpdateSchema(message_id=last_read_in.message_id)
+        )
+
+        logger.info(
+            "Updated last read for operator {operator_id} in conversation {conversation_id} to message {message_id}",
+            operator_id=last_read.operator_id,
+            conversation_id=last_read_in.conversation_id,
+            message_id=last_read_in.message_id,
+        )
+
     async def get(self: Self, conversation_id: int) -> ConversationReadSchema:
         conversation = await self.conversation_repository.get(conversation_id)
         if not conversation:
@@ -46,10 +89,10 @@ class ConversationService:
         return conversation
 
     async def get_details(
-        self: Self, conversation_id: int
+        self: Self, operator: OperatorReadSchema, conversation_id: int
     ) -> ConversationDetailsOutSchema:
         conversation_details = await self.conversation_repository.get_details(
-            conversation_id
+            operator.id, conversation_id
         )
         if not conversation_details:
             raise ModelNotFoundException()
@@ -58,9 +101,7 @@ class ConversationService:
 
     async def get_all(
         self: Self,
-        operator_id: int,
+        operator: OperatorReadSchema,
         filter: ConversationQueryFilter = "all",
     ) -> list[ConversationOutSchema]:
-        return await self.conversation_repository.get_all_with_last_message(
-            operator_id, filter
-        )
+        return await self.conversation_repository.get_all_detailed(operator.id, filter)

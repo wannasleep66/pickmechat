@@ -1,11 +1,16 @@
 from datetime import datetime
-from typing import Any, Literal, Self, cast
+from typing import Any, Literal, Self, TypedDict, cast
 
 from common.schemas.message import MessageSource
 from pydantic import Field
 
 from app.modules.assigment.schemas import AssigmentOutSchema, AssigmentResponseSchema
-from app.modules.conversation.model import Conversation
+from app.modules.conversation.models.conversation import Conversation
+from app.modules.conversation.models.last_read import LastRead
+from app.modules.conversation.schemas.last_read import (
+    LastReadOutSchema,
+    LastReadResponseSchema,
+)
 from app.modules.message.model import Message
 from app.modules.message.schemas import (
     MessageOutSchema,
@@ -38,13 +43,22 @@ class ConversationUpdateSchema(UpdateSchema):
     avatar_url: str | None = None
 
 
+class ConversationOutSchemaModelValidateObj(TypedDict):
+    conversation: Conversation
+    last_message: Message | None
+    last_read: LastRead | None
+    unread_count: int
+
+
 class ConversationOutSchema(ConversationReadSchema):
     last_message: MessageOutSchema | None = None
+    last_read: LastReadOutSchema | None = None
+    unread_count: int = 0
 
     @classmethod
     def model_validate(
         cls,
-        obj: tuple[Conversation, Message | None],
+        obj: ConversationOutSchemaModelValidateObj,
         *,
         strict: bool | None = None,
         extra: None | Literal["allow"] | Literal["ignore"] | Literal["forbid"] = None,
@@ -53,7 +67,10 @@ class ConversationOutSchema(ConversationReadSchema):
         by_alias: bool | None = None,
         by_name: bool | None = None,
     ) -> Self:
-        conversation, last_message = obj
+        conversation = obj["conversation"]
+        last_message = obj["last_message"]
+        last_read = obj["last_read"]
+        unread_count = obj["unread_count"]
         return super().model_validate(
             cls(
                 id=conversation.id,
@@ -65,6 +82,10 @@ class ConversationOutSchema(ConversationReadSchema):
                 last_message=MessageOutSchema.model_validate(last_message)
                 if last_message
                 else None,
+                last_read=LastReadOutSchema.model_validate(last_read)
+                if last_read
+                else None,
+                unread_count=unread_count,
             ).model_dump(),
             strict=strict,
             extra=extra,
@@ -81,7 +102,7 @@ class ConversationDetailsOutSchema(ConversationOutSchema):
     @classmethod
     def model_validate(
         cls: type[Self],
-        obj: tuple[Conversation, Message | None],
+        obj: ConversationOutSchemaModelValidateObj,
         *,
         strict: bool | None = None,
         extra: None | Literal["allow"] | Literal["ignore"] | Literal["forbid"] = None,
@@ -90,11 +111,13 @@ class ConversationDetailsOutSchema(ConversationOutSchema):
         by_alias: bool | None = None,
         by_name: bool | None = None,
     ) -> Self:
+        conversation = obj["conversation"]
         return super(ConversationOutSchema, cls).model_validate(
             cls(
                 **ConversationOutSchema.model_validate(obj).model_dump(),
                 assigments=[
-                    AssigmentOutSchema.model_validate(ass) for ass in obj[0].assigments
+                    AssigmentOutSchema.model_validate(ass)
+                    for ass in conversation.assigments
                 ],
             ).model_dump(),
             strict=strict,
@@ -116,6 +139,8 @@ class ConversationResponseSchema(ResponseSchema):
     avatar_url: str | None = Field(None, description="URL аватара пользователя")
     closed_at: datetime | None = Field(None, description="Дата закрытия диалога")
     last_message: MessageResponseSchema
+    last_read: LastReadResponseSchema | None = None
+    unread_count: int = Field(0, description="Количество непрочитанных сообщений")
 
 
 class ConversationDetailsResponseSchema(ResponseSchema):
@@ -129,3 +154,5 @@ class ConversationDetailsResponseSchema(ResponseSchema):
     closed_at: datetime | None = Field(None, description="Дата закрытия диалога")
     assigments: list[AssigmentResponseSchema]
     last_message: MessageResponseSchema
+    last_read: LastReadResponseSchema | None = None
+    unread_count: int = Field(0, description="Количество непрочитанных сообщений")

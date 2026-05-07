@@ -13,7 +13,7 @@ from loguru import logger
 
 from app.exceptions import PermissionException
 from app.modules.assigment.service import AssigmentService
-from app.modules.conversation.schemas import ConversationCreateSchema
+from app.modules.conversation.schemas.conversation import ConversationCreateSchema
 from app.modules.conversation.service import ConversationService
 from app.modules.message.repository import MessageCreateSchema, MessageRepository
 from app.modules.message.schemas import (
