@@ -18,6 +18,7 @@ from loguru import logger
 from app.consumers import use_consumers
 from app.di import make_container
 from app.handlers import use_handlers
+from app.monitoring import use_monitoring
 from app.poller import Poller, PollerProvider
 from app.routes import use_routes
 from app.settings import AppSettings, EmailSettings
@@ -46,8 +47,12 @@ async def setup_broker() -> None:
 
     container = make_container(FastStreamProvider())
     broker = await container.get(RabbitBroker)
+    monitoring = await use_monitoring(container)
     use_consumers(broker)
-    app = AsgiFastStream(broker, asgi_routes=use_routes(container))
+    app = AsgiFastStream(
+        broker,
+        asgi_routes=[*use_routes(container), *monitoring],
+    )
     setup_broker_di(container, cast(FastStream, app))
     await app.run(
         log_level=logging.INFO,

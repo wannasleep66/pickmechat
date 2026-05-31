@@ -11,7 +11,7 @@ def setup_logging(env: Env) -> None:
 
     if env == "dev":
         logger.add(
-            sys.stderr,
+            sys.stdout,
             level="DEBUG",
             colorize=True,
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{function}</cyan> - <level>{message}</level>",
@@ -19,11 +19,8 @@ def setup_logging(env: Env) -> None:
 
     if env == "prod":
         logger.add(
-            "logs/app.log",
+            sys.stdout,
             level="INFO",
             format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}",
-            colorize=False,
             serialize=True,
-            rotation="100 MB",
-            compression="zip",
         )

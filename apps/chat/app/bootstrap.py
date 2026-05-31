@@ -24,6 +24,7 @@ from app.middlewares import use_middlewares
 from app.modules.auth.exceptions import (
     use_exception_handlers as use_auth_exception_handlers,
 )
+from app.monitoring import use_monitoring
 from app.routes import use_routes
 from app.settings import AppSettings
 
@@ -56,6 +57,7 @@ async def setup_web() -> None:
     use_auth_exception_handlers(app)
     use_middlewares(app, allow_origins=["*", "http://localhost:5173"])
     use_routes(app)
+    use_monitoring(app, app_name="pickmechat")
     setup_web_di(container, app)
     await Server(Config(app=app, host="0.0.0.0", port=8080)).serve()
 

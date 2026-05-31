@@ -7,6 +7,7 @@ ENV_PATH = Path(__file__).parent.parent / ".env"
 
 
 class AppSettings(BaseSettings):
+    name: str = "email_connector"
     env: Literal["prod", "dev"] = "dev"
 
     model_config = SettingsConfigDict(
@@ -44,5 +45,6 @@ class EmailSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    app: AppSettings = AppSettings()
     broker: BrokerSettings = BrokerSettings()
     email: EmailSettings = EmailSettings()

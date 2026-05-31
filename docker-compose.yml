@@ -1,12 +1,14 @@
 volumes:
   database_data:
+  prometheus_data:
+  grafana_data:
 
 services:
   broker:
     image: rabbitmq:3.11.11-management-alpine
     environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=${BROKER_USER}
+      - RABBITMQ_DEFAULT_PASS=${BROKER_PASSWORD}
     ports:
       - 5672:5672
       - 15672:15672
@@ -22,12 +24,12 @@ services:
     image: postgres:15.2-alpine
     volumes:
       - database_data:/var/lib/postgresql/data
-    env_file: ./apps/chat/.env
+    env_file: ./.env
     ports:
       - 5432:5432
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pickmeuser pickmedb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,10 +70,6 @@ services:
     volumes:
       - ./apps/email_connector/app:/app/apps/email_connector/app
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080"]
-    #   retries: 3
-    #   start_period: 15s
     depends_on:
       broker:
         condition: service_healthy
@@ -86,10 +84,6 @@ services:
     volumes:
       - ./apps/telegram_connector/app:/app/apps/telegram_connector/app
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-    #   retries: 3
-    #   start_period: 15s
     depends_on:
       broker:
         condition: service_healthy
@@ -106,3 +100,43 @@ services:
       nofile:
         soft: 65535
         hard: 65535
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=100h"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./configs/monitoring/grafana/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - prometheus
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  promtail:
+    image: grafana/promtail:latest
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./configs/monitoring/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki

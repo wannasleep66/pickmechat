@@ -1,11 +1,14 @@
-from typing import Self
+from typing import Any, Self, cast
 
 from aiogram import Bot
 from dishka import AsyncContainer, Provider, Scope, make_async_container, provide
+from faststream._internal.types import BrokerMiddleware
 from faststream.rabbit import RabbitBroker
+from faststream.rabbit.prometheus.middleware import RabbitPrometheusMiddleware
+from prometheus_client import CollectorRegistry
 
-from app.settings import BotSettings, BrokerSettings, Settings
 from app.modules.message.di import ModuleProvider as MessageModuleProvider
+from app.settings import AppSettings, BotSettings, BrokerSettings, Settings
 
 
 class SettingsProvider(Provider):
@@ -16,6 +19,10 @@ class SettingsProvider(Provider):
         return Settings()
 
     @provide
+    async def app(self: Self, settings: Settings) -> AppSettings:
+        return settings.app
+
+    @provide
     async def broker(self: Self, settings: Settings) -> BrokerSettings:
         return settings.broker
 
@@ -24,12 +31,35 @@ class SettingsProvider(Provider):
         return settings.bot
 
 
+class MonitoringRegistryProvider(Provider):
+    scope = Scope.APP
+
+    @provide
+    def registry(self: Self) -> CollectorRegistry:
+        return CollectorRegistry()
+
+
 class BrokerProvider(Provider):
     scope = Scope.APP
 
     @provide
-    def broker(self: Self, settings: BrokerSettings) -> RabbitBroker:
-        return RabbitBroker(url=settings.url)
+    def middlewares(
+        self: Self, monitoring_registry: CollectorRegistry, settings: AppSettings
+    ) -> list[BrokerMiddleware]:
+        return cast(
+            list[BrokerMiddleware[Any, Any]],
+            [
+                RabbitPrometheusMiddleware(
+                    registry=monitoring_registry, app_name=settings.name
+                )
+            ],
+        )
+
+    @provide
+    def broker(
+        self: Self, settings: BrokerSettings, middlewares: list[BrokerMiddleware]
+    ) -> RabbitBroker:
+        return RabbitBroker(url=settings.url, middlewares=middlewares)
 
 
 class BotProvider(Provider):
@@ -44,6 +74,7 @@ def make_container(*providers: Provider) -> AsyncContainer:
     return make_async_container(
         *providers,
         SettingsProvider(),
+        MonitoringRegistryProvider(),
         BrokerProvider(),
         BotProvider(),
         MessageModuleProvider(),

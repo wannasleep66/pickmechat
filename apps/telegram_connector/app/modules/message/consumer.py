@@ -1,3 +1,5 @@
+import asyncio
+
 from common.constants.rabbitmq import ChatExchange, ChatRoutingKeys
 from common.schemas.message import (
     DeliveryStatus,
@@ -6,8 +8,10 @@ from common.schemas.message import (
 )
 from dishka.integrations.faststream import FromDishka, inject
 from faststream.rabbit import RabbitQueue, RabbitRouter
-from tenacity import AsyncRetrying, RetryError, wait_exponential
+from loguru import logger
+from tenacity import AsyncRetrying, RetryError
 from tenacity.stop import stop_after_attempt
+from tenacity.wait import wait_fixed
 
 from app.modules.message.service import MessageService
 
@@ -29,16 +33,27 @@ async def outbound_message_handler(
     try:
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(5),
-            wait=wait_exponential(multiplier=1, min=2, max=10),
+            wait=wait_fixed(1),
             reraise=True,
         ):
             with attempt:
-                await message_service.send_to_client(message)
+                logger.debug(
+                    "Trying to send message to user attempt={attempt}",
+                    attempt=attempt.retry_state.attempt_number,
+                )
+                await asyncio.wait_for(
+                    message_service.send_to_client(message), timeout=15
+                )
 
         delivery_status = "delivered"
 
     except (Exception, RetryError):
         delivery_status = "failed"
+        logger.error(
+            "Failed to send message to user {user_id} from operator {operator_id}",
+            user_id=message.to.external_id,
+            operator_id=message.sender.external_id,
+        )
 
     await publisher.publish(
         DeliveryStatusSchema(

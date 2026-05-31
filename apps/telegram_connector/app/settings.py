@@ -7,6 +7,7 @@ ENV_PATH = Path(__file__).parent.parent / ".env"
 
 
 class AppSettings(BaseSettings):
+    name: str = "telegram_connector"
     env: Literal["dev", "prod"] = "dev"
 
     model_config = SettingsConfigDict(
@@ -38,5 +39,6 @@ class BotSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    app: AppSettings = AppSettings()
     broker: BrokerSettings = BrokerSettings()
     bot: BotSettings = BotSettings()
