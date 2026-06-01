@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from dishka.integrations.fastapi import FromDishka, inject
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Path, Query
 
 from app.modules.auth.security import OperatorDep
 from app.modules.operator.schemas.availability_status import (
@@ -33,8 +33,9 @@ async def get_operator(
 async def get_all_operators(
     _: OperatorDep,
     operator_service: FromDishka[OperatorService],
+    search: str | None = Query(None, description="Поиск по имени"),
 ) -> list[OperatorDetailsResponseSchema]:
-    operators = await operator_service.get_all()
+    operators = await operator_service.get_all(search=search)
     return [OperatorDetailsResponseSchema(**op.model_dump()) for op in operators]
 
 

@@ -46,9 +46,15 @@ class OperatorRepository(
         instance = await self.session.scalar(stmt)
         return OperatorDetailsOutSchema.model_validate(instance) if instance else None
 
-    async def get_all_detailed(self: Self) -> list[OperatorDetailsOutSchema]:
+    async def get_all_detailed(
+        self: Self, search: str | None = None
+    ) -> list[OperatorDetailsOutSchema]:
         stmt = select(Operator).options(
             joinedload(Operator.status), selectinload(Operator.assigments)
         )
+
+        if search:
+            stmt = stmt.filter(Operator.name.ilike(f"%{search}%"))
+
         instances = await self.session.scalars(stmt)
         return [OperatorDetailsOutSchema.model_validate(inst) for inst in instances]

@@ -90,8 +90,10 @@ class OperatorService:
             raise ModelNotFoundException()
         return operator
 
-    async def get_all(self: Self) -> list[OperatorDetailsOutSchema]:
-        return await self.operator_repository.get_all_detailed()
+    async def get_all(
+        self: Self, search: str | None = None
+    ) -> list[OperatorDetailsOutSchema]:
+        return await self.operator_repository.get_all_detailed(search=search)
 
     async def exists_with_username(self: Self, username: str) -> bool:
         return await self.operator_repository.exists_with(username=username)
