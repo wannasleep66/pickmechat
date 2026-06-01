@@ -9,11 +9,11 @@ from app.modules.conversation.schemas.conversation import (
     ConversationQueryFilter,
     ConversationResponseSchema,
 )
-from app.modules.conversation.service import ConversationService
-from apps.chat.app.modules.conversation.schemas.last_read import (
+from app.modules.conversation.schemas.last_read import (
     LastReadInSchema,
     LastReadRequestSchema,
 )
+from app.modules.conversation.service import ConversationService
 
 router = APIRouter(prefix="/conversations")
 

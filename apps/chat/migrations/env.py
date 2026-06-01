@@ -14,7 +14,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-import_module("app.modules.operator.model")
+import_module("app.modules.operator.models.operator")
+import_module("app.modules.operator.models.availability_status")
 import_module("app.modules.conversation.models.conversation")
 import_module("app.modules.conversation.models.last_read")
 import_module("app.modules.message.model")

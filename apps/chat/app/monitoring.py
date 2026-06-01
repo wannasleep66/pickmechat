@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 
-def use_monitoring(app: FastAPI, *, app_name) -> None:
+def use_monitoring(app: FastAPI, *, app_name: str) -> None:
     app.add_middleware(
         PrometheusMiddleware,
         group_paths=True,

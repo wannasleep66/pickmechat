@@ -6,9 +6,13 @@ from app.exceptions import ModelAlreadyExistsException, ModelNotFoundException
 from app.modules.assigment.repository import AssigmentRepository
 from app.modules.assigment.schemas import (
     AssigmentCreateSchema,
-    AssigmentOutSchema,
+    AssigmentReadSchema,
+)
+from app.modules.conversation.schemas.conversation import (
+    ConversationAssigmentOutSchema,
 )
 from app.modules.conversation.service import ConversationService
+from app.modules.operator.schemas.operator import OperatorAssigmentOutSchema
 from app.modules.operator.service import OperatorService
 from app.modules.realtime.events import (
     ConversationAssigned,
@@ -35,7 +39,7 @@ class AssigmentService:
 
     async def assign(
         self: Self, operator_id: int, conversation_id: int
-    ) -> AssigmentOutSchema:
+    ) -> AssigmentReadSchema:
         operator_to_assign = await self.operator_service.get(operator_id)
         conversation = await self.conversation_service.get(conversation_id)
 
@@ -103,7 +107,7 @@ class AssigmentService:
             ),
         )
 
-    async def reassign(self: Self, assigment_id: int) -> AssigmentOutSchema:
+    async def reassign(self: Self, assigment_id: int) -> AssigmentReadSchema:
         assigment_to_reassign = await self.assigment_repository.get(
             assigment_id, with_deleted=True
         )
@@ -130,15 +134,22 @@ class AssigmentService:
 
         return await self.get(reassigned.id)
 
-    async def get(self: Self, assigment_id: int) -> AssigmentOutSchema:
-        assigment = await self.assigment_repository.get_details(assigment_id)
+    async def get(self: Self, assigment_id: int) -> AssigmentReadSchema:
+        assigment = await self.assigment_repository.get(assigment_id)
         if not assigment:
             raise ModelNotFoundException()
         return assigment
 
     async def get_by_conversation(
         self: Self, conversation_id: int, with_unassigned: bool = False
-    ) -> list[AssigmentOutSchema]:
+    ) -> list[ConversationAssigmentOutSchema]:
         return await self.assigment_repository.get_all_by_conversation(
             conversation_id, with_deleted=with_unassigned
+        )
+
+    async def get_by_operator(
+        self: Self, operator_id: int, with_unassigned: bool = False
+    ) -> list[OperatorAssigmentOutSchema]:
+        return await self.assigment_repository.get_all_by_operator(
+            operator_id, with_deleted=with_unassigned
         )

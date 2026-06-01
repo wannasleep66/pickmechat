@@ -3,8 +3,9 @@ from typing import Any, Literal, Self, TypedDict, cast
 
 from common.schemas.message import MessageSource
 from pydantic import Field
+from pydantic.config import ExtraValues
 
-from app.modules.assigment.schemas import AssigmentOutSchema, AssigmentResponseSchema
+from app.modules.assigment.model import Assigment
 from app.modules.conversation.models.conversation import Conversation
 from app.modules.conversation.models.last_read import LastRead
 from app.modules.conversation.schemas.last_read import (
@@ -15,6 +16,10 @@ from app.modules.message.model import Message
 from app.modules.message.schemas import (
     MessageOutSchema,
     MessageResponseSchema,
+)
+from app.modules.operator.schemas.operator import (
+    OperatorOutSchema,
+    OperatorResponseSchema,
 )
 from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
 from app.schemas.request_response import ResponseSchema
@@ -96,8 +101,44 @@ class ConversationOutSchema(ConversationReadSchema):
         )
 
 
+class ConversationAssigmentOutSchema(ReadSchema):
+    id: int
+    operator: OperatorOutSchema
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: datetime | None = None
+
+    @classmethod
+    def model_validate(
+        cls,
+        obj: Assigment,
+        *,
+        strict: bool | None = None,
+        extra: ExtraValues | None = None,
+        from_attributes: bool | None = None,
+        context: Any | None = None,
+        by_alias: bool | None = None,
+        by_name: bool | None = None,
+    ) -> Self:
+        return super().model_validate(
+            cls(
+                id=obj.id,
+                operator=OperatorOutSchema.model_validate(obj.operator),
+                created_at=obj.created_at,
+                updated_at=obj.updated_at,
+                deleted_at=obj.deleted_at,
+            ).model_dump(),
+            strict=strict,
+            extra=extra,
+            from_attributes=from_attributes,
+            context=context,
+            by_alias=by_alias,
+            by_name=by_name,
+        )
+
+
 class ConversationDetailsOutSchema(ConversationOutSchema):
-    assigments: list[AssigmentOutSchema]
+    assigments: list[ConversationAssigmentOutSchema]
 
     @classmethod
     def model_validate(
@@ -116,7 +157,7 @@ class ConversationDetailsOutSchema(ConversationOutSchema):
             cls(
                 **ConversationOutSchema.model_validate(obj).model_dump(),
                 assigments=[
-                    AssigmentOutSchema.model_validate(ass)
+                    ConversationAssigmentOutSchema.model_validate(ass)
                     for ass in conversation.assigments
                 ],
             ).model_dump(),
@@ -143,6 +184,15 @@ class ConversationResponseSchema(ResponseSchema):
     unread_count: int = Field(0, description="Количество непрочитанных сообщений")
 
 
+class ConversationAssigmentResponseSchema(ResponseSchema):
+    id: int = Field(..., description="Идентификатор назначения")
+    operator: OperatorResponseSchema
+    created_at: datetime = Field(..., description="Время создания назначения")
+    deleted_at: datetime | None = Field(
+        ..., description="Время отзыва назначения с оператора"
+    )
+
+
 class ConversationDetailsResponseSchema(ResponseSchema):
     id: int
     title: str = Field(..., description="Название диалога")
@@ -152,7 +202,7 @@ class ConversationDetailsResponseSchema(ResponseSchema):
     )
     avatar_url: str | None = Field(None, description="URL аватара пользователя")
     closed_at: datetime | None = Field(None, description="Дата закрытия диалога")
-    assigments: list[AssigmentResponseSchema]
+    assigments: list[ConversationAssigmentResponseSchema]
     last_message: MessageResponseSchema
     last_read: LastReadResponseSchema | None = None
     unread_count: int = Field(0, description="Количество непрочитанных сообщений")

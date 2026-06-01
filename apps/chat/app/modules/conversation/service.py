@@ -21,7 +21,7 @@ from app.modules.conversation.schemas.last_read import (
     LastReadInSchema,
     LastReadUpdateSchema,
 )
-from app.modules.operator.schemas import OperatorReadSchema
+from app.modules.operator.schemas.operator import OperatorOutSchema
 
 
 class ConversationService:
@@ -53,7 +53,7 @@ class ConversationService:
         return closed_conversation
 
     async def set_last_read(
-        self: Self, operator: OperatorReadSchema, last_read_in: LastReadInSchema
+        self: Self, operator: OperatorOutSchema, last_read_in: LastReadInSchema
     ) -> None:
 
         last_read = await self.last_read_repository.get_by(
@@ -89,7 +89,7 @@ class ConversationService:
         return conversation
 
     async def get_details(
-        self: Self, operator: OperatorReadSchema, conversation_id: int
+        self: Self, operator: OperatorOutSchema, conversation_id: int
     ) -> ConversationDetailsOutSchema:
         conversation_details = await self.conversation_repository.get_details(
             operator.id, conversation_id
@@ -101,7 +101,7 @@ class ConversationService:
 
     async def get_all(
         self: Self,
-        operator: OperatorReadSchema,
+        operator: OperatorOutSchema,
         filter: ConversationQueryFilter = "all",
     ) -> list[ConversationOutSchema]:
         return await self.conversation_repository.get_all_detailed(operator.id, filter)

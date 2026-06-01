@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models import TimestampMixin
-from app.modules.assigment.model import Assigment
+
+if TYPE_CHECKING:
+    from app.modules.assigment.model import Assigment
 
 
 class Conversation(Base, TimestampMixin):
@@ -16,4 +19,4 @@ class Conversation(Base, TimestampMixin):
     channel: Mapped[str]
     closed_at: Mapped[datetime | None] = mapped_column(default=None)
 
-    assigments: Mapped[list[Assigment]] = relationship()
+    assigments: Mapped[list["Assigment"]] = relationship(back_populates="conversation")

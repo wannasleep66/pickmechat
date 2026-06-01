@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
-from apps.chat.app.schemas.request_response import RequestSchema, ResponseSchema
+from app.schemas.request_response import RequestSchema, ResponseSchema
 
 
 class LastReadReadSchema(ReadSchema):

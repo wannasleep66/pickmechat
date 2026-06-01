@@ -13,7 +13,7 @@ from app.modules.auth.schemas import (
 )
 from app.modules.auth.security import OAuthToken, OperatorDep
 from app.modules.auth.services.auth import AuthService
-from app.modules.operator.schemas import OperatorResponseSchema
+from app.modules.operator.schemas.operator import OperatorResponseSchema
 
 router = APIRouter(prefix="/auth")
 

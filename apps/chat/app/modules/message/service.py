@@ -15,13 +15,14 @@ from app.exceptions import PermissionException
 from app.modules.assigment.service import AssigmentService
 from app.modules.conversation.schemas.conversation import ConversationCreateSchema
 from app.modules.conversation.service import ConversationService
-from app.modules.message.repository import MessageCreateSchema, MessageRepository
+from app.modules.message.repository import MessageRepository
 from app.modules.message.schemas import (
+    MessageCreateSchema,
     MessageInSchema,
     MessageOutSchema,
     MessageUpdateSchema,
 )
-from app.modules.operator.schemas import OperatorReadSchema
+from app.modules.operator.schemas.operator import OperatorOutSchema
 from app.modules.realtime.events import (
     DeliveryStatusUpdateEvent,
     DeliveryStatusUpdatePayload,
@@ -103,7 +104,7 @@ class MessageService:
 
     async def send_to_client(
         self: Self,
-        operator: OperatorReadSchema,
+        operator: OperatorOutSchema,
         conversation_id: int,
         message_in: MessageInSchema,
     ) -> None:

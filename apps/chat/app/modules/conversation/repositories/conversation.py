@@ -1,6 +1,6 @@
-from typing import Self
+from typing import Any, Callable, Self
 
-from sqlalchemy import and_, desc, func, select
+from sqlalchemy import Select, and_, desc, func, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import coalesce, count
 
@@ -94,7 +94,7 @@ class ConversationRepository(
             .scalar_subquery()
         )
 
-        apply_filter = {
+        apply_filter: Callable[[Select[Any]], Select[Any]] = {
             "assigned": lambda stmt: stmt.join(
                 Assigment, Assigment.conversation_id == Conversation.id
             ).filter(Assigment.operator_id == operator_id),

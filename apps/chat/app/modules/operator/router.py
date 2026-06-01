@@ -4,7 +4,14 @@ from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path
 
 from app.modules.auth.security import OperatorDep
-from app.modules.operator.schemas import OperatorResponseSchema
+from app.modules.operator.schemas.availability_status import (
+    AvailabilityStatusResponseSchema,
+)
+from app.modules.operator.schemas.operator import (
+    OperatorChangeAvailabilityRequestSchema,
+    OperatorDetailsResponseSchema,
+    OperatorUpdateRequestSchema,
+)
 from app.modules.operator.service import OperatorService
 
 router = APIRouter(prefix="/operators")
@@ -16,9 +23,9 @@ async def get_operator(
     _: OperatorDep,
     operator_id: Annotated[int, Path(..., description="Идентификатор оператора")],
     operator_service: FromDishka[OperatorService],
-) -> OperatorResponseSchema:
-    operator = await operator_service.get(operator_id)
-    return OperatorResponseSchema(**operator.model_dump())
+) -> OperatorDetailsResponseSchema:
+    operator = await operator_service.get_details(operator_id)
+    return OperatorDetailsResponseSchema(**operator.model_dump())
 
 
 @router.get("/")
@@ -26,6 +33,30 @@ async def get_operator(
 async def get_all_operators(
     _: OperatorDep,
     operator_service: FromDishka[OperatorService],
-) -> list[OperatorResponseSchema]:
+) -> list[OperatorDetailsResponseSchema]:
     operators = await operator_service.get_all()
-    return [OperatorResponseSchema(**op.model_dump()) for op in operators]
+    return [OperatorDetailsResponseSchema(**op.model_dump()) for op in operators]
+
+
+@router.put("/me/profile")
+@inject
+async def update_profile(
+    operator: OperatorDep,
+    operator_update: OperatorUpdateRequestSchema,
+    operator_service: FromDishka[OperatorService],
+) -> OperatorDetailsResponseSchema:
+    updated_operator = await operator_service.update(operator, operator_update)
+    return OperatorDetailsResponseSchema(**updated_operator.model_dump())
+
+
+@router.put("/me/availability")
+@inject
+async def change_availability_status(
+    operator: OperatorDep,
+    operator_update: OperatorChangeAvailabilityRequestSchema,
+    operator_service: FromDishka[OperatorService],
+) -> AvailabilityStatusResponseSchema:
+    status = await operator_service.change_availability(
+        operator, operator_update.status
+    )
+    return AvailabilityStatusResponseSchema(**status.model_dump())

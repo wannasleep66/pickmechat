@@ -5,9 +5,12 @@ from app.modules.auth.exceptions import WrongCredentialsException
 from app.modules.auth.schemas import LoginSchema, RegisterSchema, Sessionchema
 from app.modules.auth.services.hash import HashService
 from app.modules.auth.services.token import TokenService
-from app.modules.operator.service import (
+from app.modules.operator.schemas.operator import (
     OperatorCreateSchema,
+    OperatorOutSchema,
     OperatorReadSchema,
+)
+from app.modules.operator.service import (
     OperatorService,
 )
 
@@ -53,7 +56,7 @@ class AuthService:
             )
         )
 
-    async def verify(self: Self, access_token: str) -> OperatorReadSchema:
+    async def verify(self: Self, access_token: str) -> OperatorOutSchema:
         payload = self.token_service.verify(access_token)
         return await self.operator_service.get(int(payload.sub))
 
@@ -62,6 +65,6 @@ class AuthService:
         access_token = self.token_service.create_access(int(payload.sub))
         return access_token
 
-    async def get_subscription_token(self: Self, operator: OperatorReadSchema) -> str:
+    async def get_subscription_token(self: Self, operator: OperatorOutSchema) -> str:
         token = self.token_service.create_subscription(operator.id)
         return token

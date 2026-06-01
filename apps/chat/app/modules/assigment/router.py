@@ -4,9 +4,9 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, Path, status
 
+from app.modules.assigment.schemas import AssigmentResponseSchema
 from app.modules.assigment.service import AssigmentService
 from app.modules.auth.security import OperatorDep
-from apps.chat.app.modules.assigment.schemas import AssigmentResponseSchema
 
 router = APIRouter()
 
