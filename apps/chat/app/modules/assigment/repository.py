@@ -24,6 +24,15 @@ class AssigmentRepository(
     model_type = Assigment
     model_schema = AssigmentReadSchema
 
+    async def get_details(self: Self, assigment_id: int) -> AssigmentOutSchema | None:
+        stmt = (
+            select(Assigment)
+            .options(joinedload(Assigment.operator))
+            .filter_by(id=assigment_id, deleted_at=None)
+        )
+        instance = await self.session.scalar(stmt)
+        return AssigmentOutSchema.model_validate(instance) if instance else None
+
     async def get_all_by_conversation(
         self: Self, conversation_id: int, with_deleted: bool = False
     ) -> list[AssigmentOutSchema]:

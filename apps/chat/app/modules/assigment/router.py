@@ -6,6 +6,7 @@ from fastapi import APIRouter, Path, status
 
 from app.modules.assigment.service import AssigmentService
 from app.modules.auth.security import OperatorDep
+from apps.chat.app.modules.assigment.schemas import AssigmentResponseSchema
 
 router = APIRouter()
 
@@ -20,10 +21,11 @@ async def assign_conversation_to_operator(
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     operator_id: Annotated[int, Path(..., description="Идентификатор оператора")],
     assigment_service: FromDishka[AssigmentService],
-) -> None:
+) -> AssigmentResponseSchema:
     """Назначение диалога оператору"""
 
-    await assigment_service.assign(operator_id, conversation_id)
+    assigned = await assigment_service.assign(operator_id, conversation_id)
+    return AssigmentResponseSchema(**assigned.model_dump())
 
 
 @router.delete(
@@ -50,7 +52,8 @@ async def take_conversation(
     operator: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     assigment_service: FromDishka[AssigmentService],
-) -> None:
+) -> AssigmentResponseSchema:
     """Назначение диалога себе"""
 
-    await assigment_service.assign(operator.id, conversation_id)
+    assigned = await assigment_service.assign(operator.id, conversation_id)
+    return AssigmentResponseSchema(**assigned.model_dump())

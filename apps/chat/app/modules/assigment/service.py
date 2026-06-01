@@ -33,7 +33,9 @@ class AssigmentService:
         self.conversation_service = conversation_service
         self.realtime_transport = realtime_transport
 
-    async def assign(self: Self, operator_id: int, conversation_id: int) -> None:
+    async def assign(
+        self: Self, operator_id: int, conversation_id: int
+    ) -> AssigmentOutSchema:
         operator_to_assign = await self.operator_service.get(operator_id)
         conversation = await self.conversation_service.get(conversation_id)
 
@@ -49,7 +51,7 @@ class AssigmentService:
             else:
                 raise ModelAlreadyExistsException()
 
-        assigment = await self.assigment_repository.create(
+        assigned = await self.assigment_repository.create(
             AssigmentCreateSchema(
                 operator_id=operator_to_assign.id, conversation_id=conversation.id
             )
@@ -57,19 +59,21 @@ class AssigmentService:
 
         logger.info(
             "Assigned conversation {cid} to operator {oid}",
-            cid=assigment.conversation_id,
-            oid=assigment.operator_id,
+            cid=assigned.conversation_id,
+            oid=assigned.operator_id,
         )
 
         await self.realtime_transport.publish(
-            f"personal:{assigment.operator_id}",
+            f"personal:{assigned.operator_id}",
             ConversationAssigned(
                 payload=ConversationAssignedPayload(
-                    conversation_id=assigment.conversation_id,
-                    operator_id=assigment.operator_id,
+                    conversation_id=assigned.conversation_id,
+                    operator_id=assigned.operator_id,
                 )
             ),
         )
+
+        return await self.get(assigned.id)
 
     async def unassign(self: Self, operator_id: int, conversation_id: int) -> None:
         operator_to_unassign = await self.operator_service.get(operator_id)
@@ -99,7 +103,7 @@ class AssigmentService:
             ),
         )
 
-    async def reassign(self: Self, assigment_id: int) -> None:
+    async def reassign(self: Self, assigment_id: int) -> AssigmentOutSchema:
         assigment_to_reassign = await self.assigment_repository.get(
             assigment_id, with_deleted=True
         )
@@ -123,6 +127,14 @@ class AssigmentService:
                 )
             ),
         )
+
+        return await self.get(reassigned.id)
+
+    async def get(self: Self, assigment_id: int) -> AssigmentOutSchema:
+        assigment = await self.assigment_repository.get_details(assigment_id)
+        if not assigment:
+            raise ModelNotFoundException()
+        return assigment
 
     async def get_by_conversation(
         self: Self, conversation_id: int, with_unassigned: bool = False
