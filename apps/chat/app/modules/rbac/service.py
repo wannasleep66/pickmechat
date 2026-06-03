@@ -27,7 +27,7 @@ class RBACService:
         logger.info(
             "Attached role {role_id} to operator {operator_id}",
             role_id=attached_role.id,
-            operator=operator_to_update.id,
+            operator_id=operator_to_update.id,
         )
         return attached_role
 
