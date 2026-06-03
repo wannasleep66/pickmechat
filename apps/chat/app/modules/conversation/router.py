@@ -3,7 +3,7 @@ from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path, Query, status
 
-from app.modules.auth.security import OperatorDep
+from app.modules.auth.security import OperatorDep, auth
 from app.modules.conversation.schemas.conversation import (
     ConversationDetailsResponseSchema,
     ConversationQueryFilter,
@@ -64,10 +64,13 @@ async def set_conversation_last_read(
     )
 
 
-@router.delete("/{conversation_id}/close", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{conversation_id}/close",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[auth()],
+)
 @inject
 async def close_conversation(
-    _: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     conversation_service: FromDishka[ConversationService],
 ) -> None:

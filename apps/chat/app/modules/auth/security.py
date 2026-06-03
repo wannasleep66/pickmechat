@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import Depends
@@ -17,6 +17,10 @@ async def get_current_operator(
     token: OAuthToken, auth_service: FromDishka[AuthService]
 ) -> OperatorOutSchema:
     return await auth_service.verify(token)
+
+
+def auth() -> Any:
+    return Depends(get_current_operator)
 
 
 OperatorDep = Annotated[OperatorOutSchema, Depends(get_current_operator)]

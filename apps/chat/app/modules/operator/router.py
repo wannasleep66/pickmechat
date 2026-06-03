@@ -3,7 +3,7 @@ from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path, Query
 
-from app.modules.auth.security import OperatorDep
+from app.modules.auth.security import OperatorDep, auth
 from app.modules.operator.schemas.availability_status import (
     AvailabilityStatusResponseSchema,
 )
@@ -17,10 +17,9 @@ from app.modules.operator.service import OperatorService
 router = APIRouter(prefix="/operators")
 
 
-@router.get("/{operator_id}")
+@router.get("/{operator_id}", dependencies=[auth()])
 @inject
 async def get_operator(
-    _: OperatorDep,
     operator_id: Annotated[int, Path(..., description="Идентификатор оператора")],
     operator_service: FromDishka[OperatorService],
 ) -> OperatorDetailsResponseSchema:
@@ -28,10 +27,9 @@ async def get_operator(
     return OperatorDetailsResponseSchema(**operator.model_dump())
 
 
-@router.get("/")
+@router.get("/", dependencies=[auth()])
 @inject
 async def get_all_operators(
-    _: OperatorDep,
     operator_service: FromDishka[OperatorService],
     search: str | None = Query(None, description="Поиск по имени"),
 ) -> list[OperatorDetailsResponseSchema]:

@@ -6,6 +6,7 @@ from app.modules.conversation.router import router as conversation_router
 from app.modules.healthcheck.router import router as health_check_router
 from app.modules.message.router import router as message_router
 from app.modules.operator.router import router as operator_router
+from app.modules.rbac.router import router as rbac_router
 
 
 def use_routes(app: FastAPI) -> None:
@@ -16,4 +17,5 @@ def use_routes(app: FastAPI) -> None:
     router.include_router(message_router, tags=["Диалоги"])
     router.include_router(conversation_router, tags=["Диалоги"])
     router.include_router(assigment_router, tags=["Диалоги"])
+    router.include_router(rbac_router, tags=["Авторизация"])
     app.include_router(router=router)

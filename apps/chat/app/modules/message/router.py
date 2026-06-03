@@ -3,7 +3,7 @@ from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path, Query, status
 
-from app.modules.auth.security import OperatorDep
+from app.modules.auth.security import OperatorDep, auth
 from app.modules.message.schemas import (
     MessageInSchema,
     MessageRequestSchema,
@@ -15,10 +15,9 @@ from app.schemas.pagination import PaginatedResponseSchema
 router = APIRouter()
 
 
-@router.get("/conversations/{conversation_id}/messages")
+@router.get("/conversations/{conversation_id}/messages", dependencies=[auth()])
 @inject
 async def get_conversation_messages(
-    _: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     message_service: FromDishka[MessageService],
     cursor: int | None = Query(

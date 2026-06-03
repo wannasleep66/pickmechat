@@ -20,6 +20,10 @@ import_module("app.modules.conversation.models.conversation")
 import_module("app.modules.conversation.models.last_read")
 import_module("app.modules.message.model")
 import_module("app.modules.assigment.model")
+import_module("app.modules.rbac.models.role")
+import_module("app.modules.rbac.models.permission")
+import_module("app.modules.rbac.models.operator_role")
+import_module("app.modules.rbac.models.role_permission")
 
 target_metadata = Base.metadata
 

@@ -7,6 +7,7 @@ from app.modules.operator.models.availability_status import AvailabilityStatus
 
 if TYPE_CHECKING:
     from app.modules.assigment.model import Assigment
+    from app.modules.rbac.models.operator_role import OperatorRole
 
 
 class Operator(Base):
@@ -19,3 +20,4 @@ class Operator(Base):
 
     status: Mapped[AvailabilityStatus | None] = relationship(lazy="joined")
     assigments: Mapped[list["Assigment"]] = relationship()
+    roles_refs: Mapped[list["OperatorRole"]] = relationship()

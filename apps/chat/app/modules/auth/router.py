@@ -11,7 +11,7 @@ from app.modules.auth.schemas import (
     SessionResponseSchema,
     SubscriptionResponseSchema,
 )
-from app.modules.auth.security import OAuthToken, OperatorDep
+from app.modules.auth.security import OAuthToken, OperatorDep, auth
 from app.modules.auth.services.auth import AuthService
 from app.modules.operator.schemas.operator import OperatorResponseSchema
 
@@ -61,10 +61,9 @@ async def get_subscription_token(
     return SubscriptionResponseSchema(token=subscription_token)
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, dependencies=[auth()])
 @inject
 async def logout(
-    _: OperatorDep,
     response: Response,
 ) -> None:
     """Выход пользователя"""

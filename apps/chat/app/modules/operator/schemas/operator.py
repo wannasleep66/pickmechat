@@ -10,6 +10,7 @@ from app.modules.operator.schemas.availability_status import (
     AvailabilityStatusOutSchema,
     AvailabilityStatusResponseSchema,
 )
+from app.modules.rbac.schemas import RoleOutSchema, RoleResponseSchema
 from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
 from app.schemas.request_response import RequestSchema, ResponseSchema
 
@@ -33,11 +34,9 @@ class OperatorUpdateSchema(UpdateSchema):
     avatar_url: str | None = None
 
 
-class OperatorOutSchema(ReadSchema):
-    username: str
-    name: str
-    avatar_url: str | None = None
+class OperatorOutSchema(OperatorReadSchema):
     availability: AvailabilityStatusOutSchema | None = None
+    roles: list[RoleOutSchema]
 
     @classmethod
     def model_validate(
@@ -55,11 +54,15 @@ class OperatorOutSchema(ReadSchema):
             cls(
                 id=obj.id,
                 username=obj.username,
+                password_hash=obj.password_hash,
                 name=obj.name,
                 avatar_url=obj.avatar_url,
                 availability=AvailabilityStatusOutSchema.model_validate(obj.status)
                 if obj.status
                 else None,
+                roles=[
+                    RoleOutSchema.model_validate(ref.role) for ref in obj.roles_refs
+                ],
             ).model_dump(),
             strict=strict,
             extra=extra,
@@ -117,6 +120,9 @@ class OperatorResponseSchema(ResponseSchema):
     avatar_url: str | None = Field(None, description="URL аватара оператора")
     availability: AvailabilityStatusResponseSchema | None = Field(
         None, description="Статус доступности пользователя"
+    )
+    roles: list[RoleResponseSchema] = Field(
+        default_factory=list, description="Роли оператора"
     )
 
 

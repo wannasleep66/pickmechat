@@ -6,7 +6,7 @@ from fastapi import APIRouter, Path, status
 
 from app.modules.assigment.schemas import AssigmentResponseSchema
 from app.modules.assigment.service import AssigmentService
-from app.modules.auth.security import OperatorDep
+from app.modules.auth.security import OperatorDep, auth
 
 router = APIRouter()
 
@@ -14,10 +14,10 @@ router = APIRouter()
 @router.post(
     "/conversations/{conversation_id}/operators/{operator_id}/assign",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[auth()],
 )
 @inject
 async def assign_conversation_to_operator(
-    _: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     operator_id: Annotated[int, Path(..., description="Идентификатор оператора")],
     assigment_service: FromDishka[AssigmentService],
@@ -31,10 +31,10 @@ async def assign_conversation_to_operator(
 @router.delete(
     "/conversations/{conversation_id}/operators/{operator_id}/assign",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[auth()],
 )
 @inject
 async def unassign_conversation_from_operator(
-    _: OperatorDep,
     conversation_id: Annotated[int, Path(..., description="Идентификатор диалога")],
     operator_id: Annotated[int, Path(..., description="Идентификатор оператора")],
     assigment_service: FromDishka[AssigmentService],

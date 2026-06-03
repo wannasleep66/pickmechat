@@ -11,6 +11,7 @@ from app.modules.auth.di import ModuleProvider as AuthModuleProvider
 from app.modules.conversation.di import ModuleProvider as ConversationModuleProvider
 from app.modules.message.di import ModuleProvider as MessageModuleProvider
 from app.modules.operator.di import ModuleProvider as OperatorModuleProvider
+from app.modules.rbac.di import ModuleProvider as RBACModuleProvider
 from app.modules.realtime.di import ModuleProvider as RealtimeModuleProvider
 from app.settings import (
     AuthSettings,
@@ -75,4 +76,5 @@ def make_container(*providers: Provider) -> AsyncContainer:
         OperatorModuleProvider(),
         AuthModuleProvider(),
         AssigmentModuleProvider(),
+        RBACModuleProvider(),
     )

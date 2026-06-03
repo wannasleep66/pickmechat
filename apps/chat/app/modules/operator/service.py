@@ -73,7 +73,7 @@ class OperatorService:
         return AvailabilityStatusOutSchema(**updated_status.model_dump())
 
     async def get(self: Self, operator_id: int) -> OperatorOutSchema:
-        operator = await self.operator_repository.get_by_id(operator_id)
+        operator = await self.operator_repository.get(operator_id)
         if not operator:
             raise ModelNotFoundException()
         return operator
