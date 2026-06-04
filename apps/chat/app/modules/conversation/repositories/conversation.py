@@ -1,6 +1,6 @@
 from typing import Any, Callable, Self
 
-from sqlalchemy import Select, and_, desc, func, select
+from sqlalchemy import Select, and_, desc, func, select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import coalesce, count
 
@@ -16,6 +16,10 @@ from app.modules.conversation.schemas.conversation import (
     ConversationUpdateSchema,
 )
 from app.modules.message.model import Message
+from app.modules.operator.models.operator import Operator
+from app.modules.rbac.models.operator_role import OperatorRole
+from app.modules.rbac.models.role import Role
+from app.modules.rbac.models.role_permission import RolePermission
 from app.repositories.database import DatabaseRepository
 
 
@@ -38,7 +42,12 @@ class ConversationRepository(
             .options(
                 selectinload(
                     Conversation.assigments.and_(Assigment.deleted_at.is_(None))
-                ).joinedload(Assigment.operator)
+                )
+                .joinedload(Assigment.operator)
+                .selectinload(Operator.roles_refs)
+                .joinedload(OperatorRole.role)
+                .selectinload(Role.permissions_refs)
+                .joinedload(RolePermission.permission)
             )
             .filter_by(id=conversation_id)
         )
@@ -145,3 +154,15 @@ class ConversationRepository(
             )
             for mapping in records.mappings().all()
         ]
+
+    async def update_closed_at(
+        self: Self, conversation_id: int, closed_at
+    ) -> ConversationReadSchema:
+        stmt = (
+            update(Conversation)
+            .filter_by(id=conversation_id)
+            .values(closed_at=closed_at)
+            .returning(Conversation)
+        )
+        updated = await self.session.scalar(stmt)
+        return ConversationReadSchema.model_validate(updated)

@@ -47,8 +47,9 @@ class ConversationService:
 
     async def close(self: Self, conversation_id: int) -> ConversationReadSchema:
         conversation_to_close = await self.get(conversation_id)
-        closed_conversation = await self.conversation_repository.update(
-            conversation_to_close.id, ConversationUpdateSchema(closed_at=datetime.now())
+        closed_conversation = await self.conversation_repository.update_closed_at(
+            conversation_to_close.id,
+            closed_at=datetime.now() if not conversation_to_close.closed_at else None,
         )
         return closed_conversation
 
