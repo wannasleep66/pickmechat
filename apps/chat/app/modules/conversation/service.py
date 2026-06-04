@@ -14,7 +14,6 @@ from app.modules.conversation.schemas.conversation import (
     ConversationOutSchema,
     ConversationQueryFilter,
     ConversationReadSchema,
-    ConversationUpdateSchema,
 )
 from app.modules.conversation.schemas.last_read import (
     LastReadCreateSchema,

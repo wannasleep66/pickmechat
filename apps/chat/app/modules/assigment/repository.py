@@ -12,6 +12,9 @@ from app.modules.assigment.schemas import (
 from app.modules.conversation.schemas.conversation import ConversationAssigmentOutSchema
 from app.modules.operator.models.operator import Operator
 from app.modules.operator.schemas.operator import OperatorAssigmentOutSchema
+from app.modules.rbac.models.operator_role import OperatorRole
+from app.modules.rbac.models.role import Role
+from app.modules.rbac.models.role_permission import RolePermission
 from app.repositories.database import DatabaseRepository
 
 
@@ -31,7 +34,14 @@ class AssigmentRepository(
     ) -> list[ConversationAssigmentOutSchema]:
         stmt = (
             select(Assigment)
-            .options(joinedload(Assigment.operator).joinedload(Operator.status))
+            .options(
+                joinedload(Assigment.operator).joinedload(Operator.status),
+                joinedload(Assigment.operator)
+                .selectinload(Operator.roles_refs)
+                .joinedload(OperatorRole.role)
+                .selectinload(Role.permissions_refs)
+                .joinedload(RolePermission.permission),
+            )
             .filter_by(conversation_id=conversation_id)
         )
         if not with_deleted:
