@@ -24,7 +24,7 @@ from app.modules.operator.schemas.operator import (
 from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
 from app.schemas.request_response import ResponseSchema
 
-ConversationQueryFilter = Literal["assigned", "closed", "open", "all"]
+ConversationQueryFilter = Literal["assigned", "unassigned", "my", "closed", "all"]
 
 
 class ConversationReadSchema(ReadSchema):

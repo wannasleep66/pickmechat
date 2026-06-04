@@ -1,6 +1,6 @@
 from typing import Any, Callable, Self
 
-from sqlalchemy import Select, and_, desc, func, select, update
+from sqlalchemy import Select, and_, desc, exists, func, select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.functions import coalesce, count
 
@@ -103,12 +103,40 @@ class ConversationRepository(
             .scalar_subquery()
         )
 
+        is_open_filter = Conversation.closed_at.is_(None)
+
         apply_filter: Callable[[Select[Any]], Select[Any]] = {
-            "assigned": lambda stmt: stmt.join(
-                Assigment, Assigment.conversation_id == Conversation.id
-            ).filter(Assigment.operator_id == operator_id),
-            "closed": lambda stmt: stmt.filter(Conversation.closed_at.is_not(None)),
-            "open": lambda stmt: stmt.filter(Conversation.closed_at.is_(None)),
+            "assigned": lambda stmt: stmt.filter(
+                exists().where(
+                    and_(
+                        Assigment.conversation_id == Conversation.id,
+                        Assigment.deleted_at.is_(None),
+                    ),
+                ),
+                is_open_filter,
+            ),
+            "unassigned": lambda stmt: stmt.filter(
+                ~exists().where(
+                    and_(
+                        Assigment.conversation_id == Conversation.id,
+                        Assigment.deleted_at.is_(None),
+                    )
+                ),
+                is_open_filter,
+            ),
+            "my": lambda stmt: stmt.filter(
+                exists(
+                    select(1).where(
+                        and_(
+                            Assigment.conversation_id == Conversation.id,
+                            Assigment.operator_id == operator_id,
+                            Assigment.deleted_at.is_(None),
+                        )
+                    )
+                ),
+                is_open_filter,
+            ),
+            "closed": lambda stmt: stmt.filter(~is_open_filter),
             "all": lambda stmt: stmt,
         }[filter]
 
