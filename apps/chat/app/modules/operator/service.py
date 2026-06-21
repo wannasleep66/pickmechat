@@ -19,6 +19,11 @@ from app.modules.operator.schemas.operator import (
     OperatorReadSchema,
     OperatorUpdateSchema,
 )
+from app.modules.realtime.events import (
+    AvailabilityStatusChanged,
+    AvailabilityStatusChangedPayload,
+)
+from app.modules.realtime.transport import RealtimeTransport
 
 
 class OperatorService:
@@ -26,9 +31,11 @@ class OperatorService:
         self: Self,
         operator_repository: OperatorRepository,
         status_repository: AvailabilityStatusRepository,
+        realtime_transport: RealtimeTransport,
     ) -> None:
         self.operator_repository = operator_repository
         self.status_repository = status_repository
+        self.realtime_transport = realtime_transport
 
     async def create(
         self: Self, operator_create: OperatorCreateSchema
@@ -64,6 +71,15 @@ class OperatorService:
         operator_to_update = await self.get(operator.id)
         updated_status = await self.status_repository.upsert_by_operator(
             operator_to_update.id, AvailabilityStatusUpdateSchema(status=status)
+        )
+        operators = await self.get_all()
+        await self.realtime_transport.broadcast(
+            [f"personal:{op.id}" for op in operators],
+            AvailabilityStatusChanged(
+                payload=AvailabilityStatusChangedPayload(
+                    operator_id=operator_to_update.id, status=updated_status.status
+                )
+            ),
         )
         logger.info(
             "Set operator {operator_id} availability status {status}",

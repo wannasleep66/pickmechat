@@ -6,6 +6,7 @@ from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 
 from app.modules.message.schemas import MessageOutSchema, MessageSender
+from app.modules.operator.schemas.availability_status import AvailabilityStatus
 
 
 class RealtimeEventPayload(BaseModel):
@@ -75,3 +76,13 @@ class ConversationAssigned(RealtimeEvent[ConversationAssignedPayload]):
 class ConversationUnassigned(RealtimeEvent[ConversationUnassignedPayload]):
     type: str = "conversation_unassigned"
     payload: ConversationUnassignedPayload
+
+
+class AvailabilityStatusChangedPayload(RealtimeEventPayload):
+    operator_id: int
+    status: AvailabilityStatus
+
+
+class AvailabilityStatusChanged(RealtimeEvent[AvailabilityStatusChangedPayload]):
+    type: str = "availability_status_changed"
+    payload: AvailabilityStatusChangedPayload

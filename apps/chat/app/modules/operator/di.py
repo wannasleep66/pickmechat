@@ -8,6 +8,7 @@ from app.modules.operator.repositories.availability_status import (
 )
 from app.modules.operator.repositories.operator import OperatorRepository
 from app.modules.operator.service import OperatorService
+from app.modules.realtime.transport import RealtimeTransport
 
 
 class ModuleProvider(Provider):
@@ -26,7 +27,10 @@ class ModuleProvider(Provider):
         self: Self,
         operator_repository: OperatorRepository,
         status_repository: AvailabilityStatusRepository,
+        realtime_transport: RealtimeTransport,
     ) -> OperatorService:
         return OperatorService(
-            operator_repository=operator_repository, status_repository=status_repository
+            operator_repository=operator_repository,
+            status_repository=status_repository,
+            realtime_transport=realtime_transport,
         )
