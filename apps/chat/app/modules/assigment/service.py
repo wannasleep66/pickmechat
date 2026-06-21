@@ -61,14 +61,11 @@ class AssigmentService:
             )
         )
 
-        logger.info(
-            "Assigned conversation {cid} to operator {oid}",
-            cid=assigned.conversation_id,
-            oid=assigned.operator_id,
+        subscribers = await self.assigment_repository.get_all_by_conversation(
+            conversation_id=assigned.conversation_id
         )
-
-        await self.realtime_transport.publish(
-            f"personal:{assigned.operator_id}",
+        await self.realtime_transport.broadcast(
+            [f"personal:{subscriber.operator.id}" for subscriber in subscribers],
             ConversationAssigned(
                 payload=ConversationAssignedPayload(
                     conversation_id=assigned.conversation_id,
@@ -76,7 +73,11 @@ class AssigmentService:
                 )
             ),
         )
-
+        logger.info(
+            "Assigned conversation {cid} to operator {oid}",
+            cid=assigned.conversation_id,
+            oid=assigned.operator_id,
+        )
         return await self.get(assigned.id)
 
     async def unassign(self: Self, operator_id: int, conversation_id: int) -> None:
@@ -89,22 +90,25 @@ class AssigmentService:
         if not assigment_to_delete:
             raise ModelNotFoundException()
 
-        await self.assigment_repository.soft_delete(assigment_to_delete.id)
-
-        logger.info(
-            "Unassigned conversation {cid} from operator {oid}",
-            cid=assigment_to_delete.conversation_id,
-            oid=assigment_to_delete.operator_id,
+        subscribers = await self.assigment_repository.get_all_by_conversation(
+            conversation_id=assigment_to_delete.conversation_id
         )
 
-        await self.realtime_transport.publish(
-            f"personal:{assigment_to_delete.operator_id}",
+        await self.assigment_repository.soft_delete(assigment_to_delete.id)
+
+        await self.realtime_transport.broadcast(
+            [f"personal:{subscriber.operator.id}" for subscriber in subscribers],
             ConversationUnassigned(
                 payload=ConversationUnassignedPayload(
                     conversation_id=assigment_to_delete.conversation_id,
                     operator_id=assigment_to_delete.operator_id,
                 )
             ),
+        )
+        logger.info(
+            "Unassigned conversation {cid} from operator {oid}",
+            cid=assigment_to_delete.conversation_id,
+            oid=assigment_to_delete.operator_id,
         )
 
     async def reassign(self: Self, assigment_id: int) -> AssigmentReadSchema:
@@ -116,14 +120,11 @@ class AssigmentService:
 
         reassigned = await self.assigment_repository.recover(assigment_to_reassign.id)
 
-        logger.info(
-            "Reassigned conversation {cid} to operator {oid}",
-            cid=reassigned.conversation_id,
-            oid=reassigned.operator_id,
+        subscribers = await self.assigment_repository.get_all_by_conversation(
+            conversation_id=reassigned.conversation_id
         )
-
-        await self.realtime_transport.publish(
-            f"personal:{reassigned.operator_id}",
+        await self.realtime_transport.broadcast(
+            [f"personal:{subscriber.operator.id}" for subscriber in subscribers],
             ConversationAssigned(
                 payload=ConversationAssignedPayload(
                     conversation_id=reassigned.conversation_id,
@@ -131,7 +132,11 @@ class AssigmentService:
                 )
             ),
         )
-
+        logger.info(
+            "Reassigned conversation {cid} to operator {oid}",
+            cid=reassigned.conversation_id,
+            oid=reassigned.operator_id,
+        )
         return await self.get(reassigned.id)
 
     async def get(self: Self, assigment_id: int) -> AssigmentReadSchema:
