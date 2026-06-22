@@ -18,7 +18,7 @@ class MessageAttachment(BaseModel):
 
 class MessageContent(BaseModel):
     text: str
-    attachments: list[MessageAttachmentType]
+    attachments: list[MessageAttachment]
 
 
 class OutgoingMessageSchema(BaseModel):

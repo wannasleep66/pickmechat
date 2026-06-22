@@ -35,7 +35,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -76,7 +80,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -105,7 +113,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -186,9 +198,7 @@
         ]
       },
       "options": {
-        "sortBy": [
-          { "displayName": "Requests", "desc": true }
-        ]
+        "sortBy": [{ "displayName": "Requests", "desc": true }]
       },
       "transformations": [
         {
@@ -199,7 +209,10 @@
               "path": { "aggregations": [], "operation": "groupby" },
               "Requests": { "aggregations": ["sum"], "operation": "aggregate" },
               "Errors": { "aggregations": ["sum"], "operation": "aggregate" },
-              "Error rate": { "aggregations": ["sum"], "operation": "aggregate" },
+              "Error rate": {
+                "aggregations": ["sum"],
+                "operation": "aggregate"
+              },
               "P50": { "aggregations": ["mean"], "operation": "aggregate" },
               "P95": { "aggregations": ["mean"], "operation": "aggregate" },
               "P99": { "aggregations": ["mean"], "operation": "aggregate" }
@@ -265,7 +278,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -339,7 +356,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -373,7 +394,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -403,7 +428,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -445,7 +474,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -475,7 +508,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
@@ -505,7 +542,11 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
         "tooltip": { "mode": "multi" }
       },
       "targets": [

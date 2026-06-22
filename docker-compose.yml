@@ -53,10 +53,32 @@ services:
       broker:
         condition: service_healthy
 
-  migrator:
+  chat-migrator:
     <<: *chat
     ports: []
     working_dir: /app/apps/chat
+    command: alembic upgrade head
+    restart: no
+
+  storage: &storage
+    build:
+      context: .
+      dockerfile: ./apps/storage/Dockerfile
+    env_file: ./apps/storage/.env
+    ports:
+      - 8004:8080
+    volumes:
+      - ./apps/storage/app:/app/apps/storage/app
+      - ./apps/storage/migrations:/app/apps/storage/migrations
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_started
+
+  storage-migrator:
+    <<: *storage
+    ports: []
+    working_dir: /app/apps/storage
     command: alembic upgrade head
     restart: no
 

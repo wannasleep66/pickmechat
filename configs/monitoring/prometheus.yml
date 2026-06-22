@@ -8,6 +8,9 @@ scrape_configs:
       - targets: ["chat:8080"]
         labels:
           service: chat
+      - targets: ["storage:8080"]
+        labels:
+          service: storage
       - targets: ["telegram_connector:8080"]
         labels:
           service: telegram_connector
