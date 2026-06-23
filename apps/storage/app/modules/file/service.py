@@ -27,10 +27,23 @@ class FileService:
     async def upload(self: Self, request: UploadFileSchema) -> FileReadSchema:
         filename = request.file.filename if request.file.filename else str(uuid4())[:8]
         path = f"/storage/{request.source}/{filename}"
+
         async with self.storage_repository:
             await self.storage_repository.write(
                 path=path, content=await request.file.read()
             )
+
+        if await self.file_repository.exists_with(path=path):
+            replaced = cast(
+                FileReadSchema, await self.file_repository.get_by(path=path)
+            )
+            logger.info(
+                "Replaced file {file_id} at {file_path}",
+                file_id=replaced.id,
+                file_path=replaced.path,
+            )
+            return replaced
+
         uploaded = await self.file_repository.create(
             FileCreateSchema(
                 filename=filename,

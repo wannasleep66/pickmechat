@@ -7,28 +7,39 @@ from faststream.rabbit import RabbitBroker
 from faststream.rabbit.prometheus.middleware import RabbitPrometheusMiddleware
 from prometheus_client import CollectorRegistry
 
+from app.gateways.di import GatewaysProvider
 from app.modules.message.di import ModuleProvider as MessageModuleProvider
-from app.settings import AppSettings, BotSettings, BrokerSettings, Settings
+from app.settings import (
+    AppSettings,
+    BotSettings,
+    BrokerSettings,
+    GatewaysSettings,
+    Settings,
+)
 
 
 class SettingsProvider(Provider):
     scope = Scope.APP
 
     @provide
-    async def settings(self: Self) -> Settings:
+    def settings(self: Self) -> Settings:
         return Settings()
 
     @provide
-    async def app(self: Self, settings: Settings) -> AppSettings:
+    def app(self: Self, settings: Settings) -> AppSettings:
         return settings.app
 
     @provide
-    async def broker(self: Self, settings: Settings) -> BrokerSettings:
+    def broker(self: Self, settings: Settings) -> BrokerSettings:
         return settings.broker
 
     @provide
-    async def bot(self: Self, settings: Settings) -> BotSettings:
+    def bot(self: Self, settings: Settings) -> BotSettings:
         return settings.bot
+
+    @provide
+    def gateways(self: Self, settings: Settings) -> GatewaysSettings:
+        return settings.gateways
 
 
 class MonitoringRegistryProvider(Provider):
@@ -77,5 +88,6 @@ def make_container(*providers: Provider) -> AsyncContainer:
         MonitoringRegistryProvider(),
         BrokerProvider(),
         BotProvider(),
+        GatewaysProvider(),
         MessageModuleProvider(),
     )

@@ -38,7 +38,14 @@ class BotSettings(BaseSettings):
     )
 
 
+class GatewaysSettings(BaseSettings):
+    storage_url: str
+
+    model_config = SettingsConfigDict(env_file=ENV_PATH, extra="ignore")
+
+
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     broker: BrokerSettings = BrokerSettings()
     bot: BotSettings = BotSettings()
+    gateways: GatewaysSettings = GatewaysSettings()

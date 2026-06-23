@@ -13,7 +13,7 @@ type DeliveryStatus = Literal["delivered", "failed", "pending"]
 
 class MessageAttachment(BaseModel):
     type: MessageAttachmentType
-    url: str
+    id: int
 
 
 class MessageContent(BaseModel):

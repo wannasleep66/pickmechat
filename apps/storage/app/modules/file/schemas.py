@@ -1,3 +1,4 @@
+from common.schemas.file import FileSchema
 from fastapi import UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict
@@ -29,7 +30,7 @@ class UploadFileSchema(BaseModel):
     file: UploadFile
 
 
-class FileResponseSchema(ResponseSchema, FileReadSchema): ...
+class FileResponseSchema(ResponseSchema, FileSchema): ...
 
 
 class FileStreamSchema(BaseModel):

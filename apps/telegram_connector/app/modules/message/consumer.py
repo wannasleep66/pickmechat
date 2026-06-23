@@ -13,7 +13,7 @@ from tenacity import AsyncRetrying, RetryError
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_fixed
 
-from app.modules.message.service import MessageService
+from app.modules.message.services.message import MessageService
 
 consumer = RabbitRouter()
 publisher = consumer.publisher()

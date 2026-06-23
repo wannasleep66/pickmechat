@@ -33,3 +33,4 @@ class MessageService:
             "Sent message to operator from user {user_id}",
             user_id=message.sender.external_id,
         )
+        logger.debug(message)
