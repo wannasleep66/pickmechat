@@ -4,7 +4,7 @@ from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Path, Query, status
 
 from app.modules.auth.security import OperatorDep, auth
-from app.modules.message.schemas import (
+from app.modules.message.schemas.message import (
     MessageInSchema,
     MessageRequestSchema,
     MessageResponseSchema,

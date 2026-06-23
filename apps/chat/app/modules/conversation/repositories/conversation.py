@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Callable, Self
 
 from sqlalchemy import Select, and_, desc, exists, func, select, update
@@ -15,7 +16,7 @@ from app.modules.conversation.schemas.conversation import (
     ConversationReadSchema,
     ConversationUpdateSchema,
 )
-from app.modules.message.model import Message
+from app.modules.message.models.message import Message
 from app.modules.operator.models.operator import Operator
 from app.modules.rbac.models.operator_role import OperatorRole
 from app.modules.rbac.models.role import Role
@@ -184,7 +185,7 @@ class ConversationRepository(
         ]
 
     async def update_closed_at(
-        self: Self, conversation_id: int, closed_at
+        self: Self, conversation_id: int, closed_at: datetime | None = None
     ) -> ConversationReadSchema:
         stmt = (
             update(Conversation)

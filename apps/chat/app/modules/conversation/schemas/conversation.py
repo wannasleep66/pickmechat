@@ -12,8 +12,8 @@ from app.modules.conversation.schemas.last_read import (
     LastReadOutSchema,
     LastReadResponseSchema,
 )
-from app.modules.message.model import Message
-from app.modules.message.schemas import (
+from app.modules.message.models.message import Message
+from app.modules.message.schemas.message import (
     MessageOutSchema,
     MessageResponseSchema,
 )

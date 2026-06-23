@@ -6,12 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.assigment.service import AssigmentService
 from app.modules.conversation.service import ConversationService
-from app.modules.message.repository import (
-    MessageRepository,
-)
-from app.modules.message.service import (
-    MessageService,
-)
+from app.modules.message.repositories.attachment import AttachmentRepository
+from app.modules.message.repositories.message import MessageRepository
+from app.modules.message.service import MessageService
 from app.modules.realtime.transport import RealtimeTransport
 
 
@@ -21,12 +18,19 @@ class ModuleProvider(Provider):
         return MessageRepository(session=session)
 
     @provide(scope=Scope.REQUEST)
+    def attachment_repository(
+        self: Self, session: AsyncSession
+    ) -> AttachmentRepository:
+        return AttachmentRepository(session=session)
+
+    @provide(scope=Scope.REQUEST)
     def message_service(
         self: Self,
         assigment_service: AssigmentService,
         conversation_service: ConversationService,
         realtime_transport: RealtimeTransport,
         message_repository: MessageRepository,
+        attachment_repository: AttachmentRepository,
         broker: RabbitBroker,
     ) -> MessageService:
         return MessageService(
@@ -34,5 +38,6 @@ class ModuleProvider(Provider):
             conversation_service=conversation_service,
             realtime_transport=realtime_transport,
             message_repository=message_repository,
+            attachment_repository=attachment_repository,
             broker=broker,
         )

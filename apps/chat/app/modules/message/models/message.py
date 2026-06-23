@@ -1,8 +1,8 @@
+from app.database import Base
+from app.modules.message.models.attachment import Attachment
+from app.modules.operator.models.operator import Operator
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.database import Base
-from app.modules.operator.models.operator import Operator
 
 
 class Message(Base):
@@ -24,3 +24,4 @@ class Message(Base):
         ForeignKey("conversations.id", ondelete="CASCADE")
     )
     operator: Mapped[Operator | None] = relationship(lazy="joined")
+    attachments: Mapped[list[Attachment]] = relationship(lazy="selectin")

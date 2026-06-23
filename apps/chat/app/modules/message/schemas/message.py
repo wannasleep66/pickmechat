@@ -1,12 +1,18 @@
 from datetime import datetime
 from typing import Any, Literal, cast
 
-from common.schemas.message import DeliveryStatus, IncomingMessageSchema, MessageSource
+from common.schemas.message import (
+    DeliveryStatus,
+    IncomingMessageSchema,
+    MessageAttachment,
+    MessageAttachmentType,
+    MessageSource,
+)
 from pydantic import Field
 from pydantic.main import BaseModel
 from typing_extensions import Self
 
-from app.modules.message.model import Message
+from app.modules.message.models.message import Message
 from app.schemas.crud import CreateSchema, ReadSchema, UpdateSchema
 from app.schemas.request_response import RequestSchema, ResponseSchema
 
@@ -50,14 +56,14 @@ class MessageUpdateSchema(UpdateSchema):
 
 class MessageInSchema(BaseModel):
     text: str
-    attachments: list[str]
+    attachments: list[MessageAttachment]
     client_id: str | None = None
 
 
 class MessageOutSchema(BaseModel):
     id: int
     text: str
-    attachments: list[str]
+    attachments: list[MessageAttachment]
     source: MessageSource
     sender: MessageSender
     delivery_status: DeliveryStatus
@@ -95,7 +101,12 @@ class MessageOutSchema(BaseModel):
             MessageOutSchema(
                 id=obj.id,
                 text=obj.text,
-                attachments=[],
+                attachments=[
+                    MessageAttachment(
+                        type=cast(MessageAttachmentType, att.type), id=att.file_id
+                    )
+                    for att in obj.attachments
+                ],
                 source=cast(MessageSource, obj.source),
                 sender=sender,
                 delivery_status=cast(DeliveryStatus, obj.delivery_status),
@@ -110,9 +121,12 @@ class MessageOutSchema(BaseModel):
         )
 
 
+class MessageAttachmentRequestSchema(RequestSchema, MessageAttachment): ...
+
+
 class MessageRequestSchema(RequestSchema):
     text: str = Field(..., description="Текст сообщения")
-    attachments: list[str] = Field(
+    attachments: list[MessageAttachmentRequestSchema] = Field(
         default=[], description="Медиа-файлы прикрепленные к сообщению"
     )
     client_id: str | None = Field(
@@ -127,11 +141,14 @@ class IncomingMessageRequestSchema(RequestSchema, IncomingMessageSchema): ...
 class MessageSenderResponseSchema(MessageSender, ResponseSchema): ...
 
 
+class MessageAttachmentResponseSchema(ResponseSchema, MessageAttachment): ...
+
+
 class MessageResponseSchema(ResponseSchema):
     id: int = Field(..., description="Уникальный идентификатор сообщения")
     text: str = Field(..., description="Текст сообщения")
-    attachments: list[str] = Field(
-        default_factory=list[str], description="Медиа-файлы прикрепленные к сообщению"
+    attachments: list[MessageAttachmentResponseSchema] = Field(
+        default_factory=list, description="Медиа-файлы прикрепленные к сообщению"
     )
     sender: MessageSenderResponseSchema = Field(
         ..., description="Отправитель сообщения"

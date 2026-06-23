@@ -1,11 +1,11 @@
 from typing import TypeVar
 
-from common.schemas.message import DeliveryStatus
+from common.schemas.message import DeliveryStatus, MessageAttachment
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 
-from app.modules.message.schemas import MessageOutSchema, MessageSender
+from app.modules.message.schemas.message import MessageOutSchema, MessageSender
 from app.modules.operator.schemas.availability_status import AvailabilityStatus
 
 
@@ -29,8 +29,15 @@ class NewMessageSenderSchema(MessageSender):
     )
 
 
+class NewMessageAttachmentSchema(MessageAttachment):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(serialization_alias=to_camel)
+    )
+
+
 class NewMessageSchema(MessageOutSchema):
     sender: NewMessageSenderSchema  # pyright: ignore[reportIncompatibleVariableOverride]
+    attachments: list[NewMessageAttachmentSchema]  # type: ignore
 
     model_config = ConfigDict(
         alias_generator=AliasGenerator(serialization_alias=to_camel)

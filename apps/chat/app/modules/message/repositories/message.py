@@ -1,7 +1,7 @@
 from sqlalchemy import desc, select
 
-from app.modules.message.model import Message
-from app.modules.message.schemas import (
+from app.modules.message.models.message import Message
+from app.modules.message.schemas.message import (
     MessageCreateSchema,
     MessageOutSchema,
     MessageReadSchema,

@@ -4,6 +4,7 @@ from common.constants.rabbitmq import ChatExchange, ChatRoutingKeys
 from common.schemas.message import (
     DeliveryStatus,
     IncomingMessageSchema,
+    MessageAttachment,
     MessageContent,
     OutgoingMessageSchema,
 )
@@ -15,8 +16,10 @@ from app.exceptions import PermissionException
 from app.modules.assigment.service import AssigmentService
 from app.modules.conversation.schemas.conversation import ConversationCreateSchema
 from app.modules.conversation.service import ConversationService
-from app.modules.message.repository import MessageRepository
-from app.modules.message.schemas import (
+from app.modules.message.repositories.attachment import AttachmentRepository
+from app.modules.message.repositories.message import MessageRepository
+from app.modules.message.schemas.attachment import AttachmentCreateSchema
+from app.modules.message.schemas.message import (
     MessageCreateSchema,
     MessageInSchema,
     MessageOutSchema,
@@ -26,6 +29,7 @@ from app.modules.operator.schemas.operator import OperatorOutSchema
 from app.modules.realtime.events import (
     DeliveryStatusUpdateEvent,
     DeliveryStatusUpdatePayload,
+    NewMessageAttachmentSchema,
     NewMessageEvent,
     NewMessageEventPayload,
     NewMessageSchema,
@@ -43,12 +47,14 @@ class MessageService:
         conversation_service: ConversationService,
         realtime_transport: RealtimeTransport,
         message_repository: MessageRepository,
+        attachment_repository: AttachmentRepository,
         broker: RabbitBroker,
     ) -> None:
         self.assigment_service = assigment_service
         self.conversation_service = conversation_service
         self.realtime_transport = realtime_transport
         self.message_repository = message_repository
+        self.attachment_repository = attachment_repository
         self.broker = broker
 
     async def send_to_operator(
@@ -74,6 +80,14 @@ class MessageService:
                 conversation_id=conversation.id,
             )
         )
+        attachments = await self.attachment_repository.bulk_create(
+            [
+                AttachmentCreateSchema(
+                    type=attachment.type, file_id=attachment.id, message_id=message.id
+                )
+                for attachment in incoming_message.content.attachments
+            ]
+        )
         logger.info(
             "External user {external_user_id} created message {message_id}",
             external_user_id=incoming_message.sender.external_id,
@@ -87,7 +101,12 @@ class MessageService:
                     new_message=NewMessageSchema(
                         id=message.id,
                         text=message.text,
-                        attachments=[],
+                        attachments=[
+                            NewMessageAttachmentSchema(
+                                id=attachment.file_id, type=attachment.type
+                            )
+                            for attachment in attachments
+                        ],
                         source=message.source,
                         timestamp=message.timestamp,
                         delivery_status=message.delivery_status,
@@ -124,6 +143,14 @@ class MessageService:
                 source="internal",
             )
         )
+        attachments = await self.attachment_repository.bulk_create(
+            [
+                AttachmentCreateSchema(
+                    type=attachment.type, file_id=attachment.id, message_id=message.id
+                )
+                for attachment in message_in.attachments
+            ]
+        )
         logger.info(
             "Operator {operator_id} created message {message_id}",
             operator_id=operator.id,
@@ -143,7 +170,13 @@ class MessageService:
                     name=conversation.title,
                     avatar_url=conversation.avatar_url,
                 ),
-                content=MessageContent(text=message.text, attachments=[]),
+                content=MessageContent(
+                    text=message.text,
+                    attachments=[
+                        MessageAttachment(id=attachment.id, type=attachment.type)
+                        for attachment in attachments
+                    ],
+                ),
                 timestamp=message.timestamp,
             ),
             exchange=ChatExchange,
@@ -159,7 +192,12 @@ class MessageService:
                     new_message=NewMessageSchema(
                         id=message.id,
                         text=message.text,
-                        attachments=[],
+                        attachments=[
+                            NewMessageAttachmentSchema(
+                                id=attachment.file_id, type=attachment.type
+                            )
+                            for attachment in attachments
+                        ],
                         source=message.source,
                         timestamp=message.timestamp,
                         delivery_status=message.delivery_status,

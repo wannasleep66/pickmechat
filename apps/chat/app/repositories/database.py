@@ -81,6 +81,20 @@ class DatabaseRepository(
         instance = await self.session.scalar(stmt)
         return self.model_schema.model_validate(instance)
 
+    async def bulk_create(
+        self: Self, create_data: list[CreateSchemaType]
+    ) -> list[ReadSchemaType]:
+        if not create_data:
+            return []
+
+        stmt = (
+            insert(self.model_type)
+            .values([item.model_dump() for item in create_data])
+            .returning(self.model_type)
+        )
+        instances = await self.session.scalars(stmt)
+        return [self.model_schema.model_validate(ins) for ins in instances]
+
     async def update(
         self: Self, id_: int, update_data: UpdateSchemaType
     ) -> ReadSchemaType:
