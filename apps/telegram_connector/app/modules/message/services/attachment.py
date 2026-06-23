@@ -4,7 +4,7 @@ from typing import Self
 from aiogram import Bot
 from common.schemas.message import MessageAttachment, MessageAttachmentType
 
-from app.gateways.storage import StorageGateway
+from app.modules.storage.gateway import StorageGateway
 
 
 class AttachmentService:
@@ -12,7 +12,7 @@ class AttachmentService:
         self.bot = bot
         self.storage_gateway = storage_gateway
 
-    async def attach(
+    async def upload(
         self: Self, type: MessageAttachmentType, file_id: str, content_type: str
     ) -> MessageAttachment:
         file = await self.bot.get_file(file_id)

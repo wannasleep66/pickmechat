@@ -173,7 +173,7 @@ class MessageService:
                 content=MessageContent(
                     text=message.text,
                     attachments=[
-                        MessageAttachment(id=attachment.id, type=attachment.type)
+                        MessageAttachment(id=attachment.file_id, type=attachment.type)
                         for attachment in attachments
                     ],
                 ),

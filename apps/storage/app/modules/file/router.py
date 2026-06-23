@@ -26,6 +26,15 @@ async def download_file(
     return FileStreamResponse(content=file.content, media_type=file.content_type)
 
 
+@router.get("/{file_id}/meta")
+@inject
+async def get_file_meta(
+    file_id: int, file_service: FromDishka[FileService]
+) -> FileResponseSchema:
+    file = await file_service.get(file_id)
+    return FileResponseSchema(**file.model_dump())
+
+
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 @inject
 async def upload_file(

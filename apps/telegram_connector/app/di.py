@@ -7,8 +7,8 @@ from faststream.rabbit import RabbitBroker
 from faststream.rabbit.prometheus.middleware import RabbitPrometheusMiddleware
 from prometheus_client import CollectorRegistry
 
-from app.gateways.di import GatewaysProvider
 from app.modules.message.di import ModuleProvider as MessageModuleProvider
+from app.modules.storage.di import ModuleProvider as StorageModuleProvider
 from app.settings import (
     AppSettings,
     BotSettings,
@@ -88,6 +88,6 @@ def make_container(*providers: Provider) -> AsyncContainer:
         MonitoringRegistryProvider(),
         BrokerProvider(),
         BotProvider(),
-        GatewaysProvider(),
+        StorageModuleProvider(),
         MessageModuleProvider(),
     )

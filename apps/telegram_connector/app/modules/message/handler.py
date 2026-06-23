@@ -42,7 +42,7 @@ async def handle_incoming(
         )
 
     try:
-        attachments = [await attachment_service.attach(*file) for file in files]
+        attachments = [await attachment_service.upload(*file) for file in files]
     except Exception:
         await message.answer("Не удалось отправить сообщение оператору")
         return

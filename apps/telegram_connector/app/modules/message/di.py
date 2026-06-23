@@ -4,9 +4,9 @@ from aiogram import Bot
 from dishka import Provider, Scope, provide
 from faststream.rabbit import RabbitBroker
 
-from app.gateways.storage import StorageGateway
 from app.modules.message.services.attachment import AttachmentService
 from app.modules.message.services.message import MessageService
+from app.modules.storage.gateway import StorageGateway
 
 
 class ModuleProvider(Provider):
@@ -17,5 +17,7 @@ class ModuleProvider(Provider):
         return AttachmentService(bot=bot, storage_gateway=storage_gateway)
 
     @provide(scope=Scope.REQUEST)
-    def message_service(self: Self, broker: RabbitBroker, bot: Bot) -> MessageService:
-        return MessageService(bot=bot, broker=broker)
+    def message_service(
+        self: Self, broker: RabbitBroker, bot: Bot, storage_gateway: StorageGateway
+    ) -> MessageService:
+        return MessageService(bot=bot, broker=broker, storage_gateway=storage_gateway)

@@ -47,8 +47,9 @@ async def outbound_message_handler(
 
         delivery_status = "delivered"
 
-    except (Exception, RetryError):
+    except (Exception, RetryError) as exc:
         delivery_status = "failed"
+        raise exc
         logger.error(
             "Failed to send message to user {user_id} from operator {operator_id}",
             user_id=message.to.external_id,
