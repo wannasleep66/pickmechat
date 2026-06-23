@@ -28,8 +28,8 @@ async def setup_web() -> None:
     app = FastAPI(lifespan=lifespan)
     use_exception_handlers(app)
     use_middlewares(app, ["*", "http://localhost:5173"])
-    use_routes(app)
     use_monitoring(app, app_name="pickmestorage")
+    use_routes(app)
     setup_web_di(container, app)
     await Server(Config(app=app, host="0.0.0.0", port=8080)).serve()
 

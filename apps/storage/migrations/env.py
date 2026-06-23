@@ -1,4 +1,5 @@
 import asyncio
+from importlib import import_module
 from logging.config import fileConfig
 
 from alembic import context
@@ -14,6 +15,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+import_module("app.modules.file.model")
 
 config.set_main_option("sqlalchemy.url", DatabaseSettings().url)
 

@@ -1,5 +1,7 @@
 volumes:
   database_data:
+  database_admin_data:
+  s3_data:
   prometheus_data:
   grafana_data:
 
@@ -33,6 +35,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  database-admin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    volumes:
+      - database_admin_data:/var/lib/pgadmin
+    depends_on:
+      - database
+
+  s3:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000" #api
+      - "9001:9001" #web
+    volumes:
+      - s3_data:/data
+    restart: unless-stopped
 
   chat: &chat
     build:
@@ -73,6 +100,8 @@ services:
     restart: unless-stopped
     depends_on:
       database:
+        condition: service_started
+      s3:
         condition: service_started
 
   storage-migrator:

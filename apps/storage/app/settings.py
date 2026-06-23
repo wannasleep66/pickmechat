@@ -29,7 +29,41 @@ class DatabaseSettings(BaseSettings):
     )
 
 
+class S3StorageSettings(BaseSettings):
+    endpoint: str
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    port: int
+    bucket: str
+    secure: bool = False
+    region_name: str = "us-east-1"
+
+    model_config = SettingsConfigDict(
+        extra="ignore", env_file=ENV_PATH, env_prefix="STORAGE_S3_"
+    )
+
+
+class LocalStorageSettings(BaseSettings):
+    path: str
+
+    model_config = SettingsConfigDict(
+        extra="ignore", env_file=ENV_PATH, env_prefix="STORAGE_LOCAL_"
+    )
+
+
+class StorageSettings(BaseSettings):
+    provider: Literal["local", "s3"]
+
+    s3: S3StorageSettings = S3StorageSettings()
+    local: LocalStorageSettings = LocalStorageSettings()
+
+    model_config = SettingsConfigDict(
+        extra="ignore", env_file=ENV_PATH, env_prefix="STORAGE_"
+    )
+
+
 class Settings(BaseSettings):
     """Настройки приложения"""
 
     database: DatabaseSettings = DatabaseSettings()
+    storage: StorageSettings = StorageSettings()
