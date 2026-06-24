@@ -103,7 +103,10 @@ class MessageOutSchema(BaseModel):
                 text=obj.text,
                 attachments=[
                     MessageAttachment(
-                        type=cast(MessageAttachmentType, att.type), id=att.file_id
+                        id=att.file_id,
+                        type=cast(MessageAttachmentType, att.type),
+                        filename=att.filename,
+                        size=att.size,
                     )
                     for att in obj.attachments
                 ],

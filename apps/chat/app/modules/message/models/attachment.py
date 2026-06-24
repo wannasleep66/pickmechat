@@ -12,3 +12,5 @@ class Attachment(Base):
         ForeignKey("messages.id", ondelete="CASCADE")
     )
     file_id: Mapped[int] = mapped_column()
+    filename: Mapped[str] = mapped_column()
+    size: Mapped[int] = mapped_column()

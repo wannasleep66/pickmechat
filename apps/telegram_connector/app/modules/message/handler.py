@@ -41,11 +41,7 @@ async def handle_incoming(
             ("file", document.file_id, document.mime_type or "application/octet-stream")
         )
 
-    try:
-        attachments = [await attachment_service.upload(*file) for file in files]
-    except Exception:
-        await message.answer("Не удалось отправить сообщение оператору")
-        return
+    attachments = [await attachment_service.upload(*file) for file in files]
 
     await message_service.send_to_operator(
         IncomingMessageSchema(

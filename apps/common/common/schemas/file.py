@@ -9,8 +9,4 @@ class FileSchema(BaseModel):
     content_type: str
     size: int
 
-    model_config = ConfigDict(
-        alias_generator=AliasGenerator(
-            validation_alias=to_camel,
-        )
-    )
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))

@@ -22,6 +22,5 @@ class AttachmentService:
             file.file_id, content, content_type
         )
         return MessageAttachment(
-            type=type,
-            id=uploaded.id,
+            id=uploaded.id, type=type, filename=uploaded.filename, size=uploaded.size
         )

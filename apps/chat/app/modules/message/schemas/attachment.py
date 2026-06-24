@@ -8,12 +8,16 @@ class AttachmentReadSchema(ReadSchema):
     type: MessageAttachmentType
     message_id: int
     file_id: int
+    filename: str
+    size: int
 
 
 class AttachmentCreateSchema(CreateSchema):
     type: MessageAttachmentType
     message_id: int
     file_id: int
+    filename: str
+    size: int
 
 
 class AttachmentUpdateSchema(UpdateSchema): ...

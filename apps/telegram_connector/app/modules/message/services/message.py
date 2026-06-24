@@ -23,31 +23,22 @@ class MessageService:
 
     async def send_to_client(self: Self, message: OutgoingMessageSchema) -> None:
         if message.content.attachments:
-
-            async def upload(file_id) -> tuple[FileSchema, StreamingResponse]:
-                meta, file = await asyncio.gather(
-                    *[
-                        self.storage_gateway.get(file_id),
-                        self.storage_gateway.download(file_id),
-                    ]
-                )
-                return (meta, file)
-
-            uploaded = await asyncio.gather(
-                *[upload(attachment.id) for attachment in message.content.attachments]
-            )
-
-            for meta, file in uploaded:
+            for attachment in message.content.attachments:
+                file = await self.storage_gateway.download(attachment.id)
                 if file.content_type.startswith("image/"):
                     await self.bot.send_photo(
                         chat_id=message.to.external_id,
-                        photo=BufferedInputFile(file.content, filename=meta.filename),
+                        photo=BufferedInputFile(
+                            file.content, filename=attachment.filename
+                        ),
                     )
                     continue
 
                 await self.bot.send_document(
                     chat_id=message.to.external_id,
-                    document=BufferedInputFile(file.content, filename=meta.filename),
+                    document=BufferedInputFile(
+                        file.content, filename=attachment.filename
+                    ),
                 )
 
         if message.content.text:

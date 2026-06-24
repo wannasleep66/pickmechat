@@ -1,8 +1,8 @@
 """added attachments table
 
-Revision ID: a1de59346622
+Revision ID: 3d3e9d1e9975
 Revises: 83b2e567b48a
-Create Date: 2026-06-23 14:34:57.107975
+Create Date: 2026-06-24 00:34:44.688491
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "a1de59346622"
+revision: str = "3d3e9d1e9975"
 down_revision: Union[str, Sequence[str], None] = "83b2e567b48a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("message_id", sa.Integer(), nullable=False),
         sa.Column("file_id", sa.Integer(), nullable=False),
+        sa.Column("filename", sa.String(), nullable=False),
+        sa.Column("size", sa.Integer(), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["message_id"],

@@ -83,7 +83,11 @@ class MessageService:
         attachments = await self.attachment_repository.bulk_create(
             [
                 AttachmentCreateSchema(
-                    type=attachment.type, file_id=attachment.id, message_id=message.id
+                    type=attachment.type,
+                    file_id=attachment.id,
+                    filename=attachment.filename,
+                    size=attachment.size,
+                    message_id=message.id,
                 )
                 for attachment in incoming_message.content.attachments
             ]
@@ -103,7 +107,10 @@ class MessageService:
                         text=message.text,
                         attachments=[
                             NewMessageAttachmentSchema(
-                                id=attachment.file_id, type=attachment.type
+                                id=attachment.file_id,
+                                type=attachment.type,
+                                filename=attachment.filename,
+                                size=attachment.size,
                             )
                             for attachment in attachments
                         ],
@@ -146,7 +153,11 @@ class MessageService:
         attachments = await self.attachment_repository.bulk_create(
             [
                 AttachmentCreateSchema(
-                    type=attachment.type, file_id=attachment.id, message_id=message.id
+                    type=attachment.type,
+                    file_id=attachment.id,
+                    filename=attachment.filename,
+                    size=attachment.size,
+                    message_id=message.id,
                 )
                 for attachment in message_in.attachments
             ]
@@ -173,7 +184,12 @@ class MessageService:
                 content=MessageContent(
                     text=message.text,
                     attachments=[
-                        MessageAttachment(id=attachment.file_id, type=attachment.type)
+                        MessageAttachment(
+                            id=attachment.file_id,
+                            type=attachment.type,
+                            filename=attachment.filename,
+                            size=attachment.size,
+                        )
                         for attachment in attachments
                     ],
                 ),
@@ -194,7 +210,10 @@ class MessageService:
                         text=message.text,
                         attachments=[
                             NewMessageAttachmentSchema(
-                                id=attachment.file_id, type=attachment.type
+                                id=attachment.file_id,
+                                type=attachment.type,
+                                filename=attachment.filename,
+                                size=attachment.size,
                             )
                             for attachment in attachments
                         ],

@@ -2,7 +2,6 @@ from io import BytesIO
 from typing import Self, cast
 from uuid import uuid4
 
-from common.schemas.file import FileSchema
 from loguru import logger
 
 from app.exceptions import ModelNotFoundException
@@ -27,7 +26,7 @@ class FileService:
 
     async def upload(self: Self, request: UploadFileSchema) -> FileReadSchema:
         filename = request.file.filename if request.file.filename else str(uuid4())[:8]
-        path = f"/storage/{request.source}/{filename}"
+        path = f"/storage/{request.source}/{str(uuid4())[:4]}{filename}"
 
         async with self.storage_repository:
             await self.storage_repository.write(
@@ -78,9 +77,9 @@ class FileService:
         await self.file_repository.delete(file_to_delete.id)
         logger.info("Deleted file {file_id}", file_id=file_to_delete.id)
 
-    async def get(self: Self, file_id: int) -> FileSchema:
+    async def get(self: Self, file_id: int) -> FileReadSchema:
         file = await self.file_repository.get(file_id)
         if not file:
             raise ModelNotFoundException()
 
-        return FileSchema(**file.model_dump())
+        return file
